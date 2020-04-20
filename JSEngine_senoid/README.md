@@ -7,16 +7,16 @@ App that shows you senoid function in a 3D way but, really this another excuse t
 [http://mfontanadev.github.io/games/deployJSEngineSenoid/JSEngine_senoid_v1.0.html](http://mfontanadev.github.io/games/deployJSEngineSenoid/JSEngine_senoid_v1.0.html)
 
 ## Motivation
-- I saw @javidx9 tutorial about Perling Noise.
-- Before try to do my 3D version of Perling I wanted to test somethings.
+- I saw @javidx9 tutorial about Perlin Noise.
+- Before try to do my 3D version of Perlin I wanted to test somethings.
 
 <table>
 	<tr>
 		<th width="360px" align="center">
-		<img width="176px" src="https://github.com/mfontanadev/appLittleConstructor/blob/master/doc/poc_house_leftside.png?raw=true">
+		<img width="360px">
 		</th>
 		<th width="360px" align="center">
-		<img width="176px" src="https://github.com/mfontanadev/appLittleConstructor/blob/master/doc/poc_house_rightside.png?raw=true?raw=true">
+		<img width="360px" src="https://github.com/mfontanadev/POCs/blob/master/JSEngine_senoid/doc/JSEngine_senoid.gif?raw=true">
 		</th>
 	</tr>
 	<tr>
@@ -41,6 +41,8 @@ I think I will make a tutorial (leitmotiv). There are multiples concepts in this
 ## References
 
 * Javidx9 tutorial: [https://www.youtube.com/watch?v=ih20l3pJoeU](https://www.youtube.com/watch?v=ih20l3pJoeU)
+
+* Javidx9 tutorial Perlin: [https://www.youtube.com/watch?v=6-0UaeJBumA](https://www.youtube.com/watch?v=6-0UaeJBumA)
 
 ## Contact
 
