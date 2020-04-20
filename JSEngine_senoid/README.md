@@ -4,7 +4,7 @@
 App that shows you senoid function in a 3D way but, really this another excuse to play with hyper minimal 3dEngineJS.
 
 ## Enjoy at
-[http://mfontanadev.github.io/games/deployJSEngineSenoid/JSEngine_senoid_v1.0.html](http://mfontanadev.github.io/games/deployJSEngineSenoid/JSEngine_senoid_v1.0.html)
+[https://mfontanadev.github.io/games/deployJSEngineSenoid/JSEngine_senoid_v1.0.html](https://mfontanadev.github.io/games/deployJSEngineSenoid/JSEngine_senoid_v1.0.html)
 
 ## Motivation
 - I saw @javidx9 tutorial about Perlin Noise.
