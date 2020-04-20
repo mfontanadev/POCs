@@ -1,0 +1,2995 @@
+<!--
+First: thanks to @Javidx9, this was inspired in his youtube tutorials
+    OneLoneCoder.com - 3D Graphics Part #1 - Triangles & Projections
+    "Tredimensjonal Grafikk" - @Javidx9
+
+Second: license
+
+Third: about this and me.
+
+License
+~~~~~~~
+JSEngine Senoid (Playing with hyper minimal 3dEngineJS). 
+Copyright (C) 2020 mfontanadev.
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions; See license for details.
+
+Original works located at:
+https://github.com/mfontanadev
+
+From mfontanadev :)
+~~~~~~~~~~~~~~~
+Hello! Use this as like as you want, I hope you can create amazing things 
+and have a lot of fun. Let me know. You acknowledge
+that I am not responsible for anything bad that happens as a result of
+your actions. However this code is protected by GNU GPLv3, see the license in the
+github repo. This means you must attribute me if you use it. You can view this
+license here: https://github.com/mfontanadev/POCs/blob/master/LICENSE
+Cheers!
+
+Background
+~~~~~~~~~~
+Sources: https://github.com/mfontanadev/POCs/JSEngine_senoid - JSEngine Senoid (Playing with hyper minimal 3dEngineJS).
+
+This programm has two layers, first you can use it likea 3dEngine, second,
+you can use it to build virtual houses. I hope this programm can inspire you
+to make your own one.
+
+Video
+~~~~~
+PENDING
+
+Author
+~~~~~~
+site: https://mfontanadev.github.io
+twitter: https://twitter.com/mfontanadev
+git: https://github.com/mfontanadev
+linkedin: https://www.linkedin.com/in/mauricio-fontana-8285681b/?originalSubdomain=ar
+
+Last Updated: 18/04/2020
+-->
+
+<html>
+<head>
+	<title>JSEngine</title>
+
+	<script type="text/javascript">
+		var C_VERSION_TITLE = "JSEngine senoid v1.0";
+		var PIXEL_SOLID = 1;
+		var FG_WHITE = "white";
+		var LINE_WIDTH = 1;
+		var DRAW_LINES = true;
+		var WIREFRAME_MODE = false;
+		var C_FPS = 24;
+		var C_TEXTURE_QUALITY = 5;
+
+		/* -------------------------------------------------------------------- */
+		var C_KEY_CTRL = 17;
+		var C_KEY_SHIFT = 16;
+		var C_KEY_RIGHT = 39;
+		var C_KEY_UP = 38;
+		var C_KEY_LEFT = 37;
+		var C_KEY_DOWN = 40;
+		var C_KEY_CHAR_Q = 81;
+		var C_KEY_CHAR_A = 65;
+		var C_KEY_CHAR_W = 87;
+		var C_KEY_CHAR_S = 83;
+		var C_KEY_CHAR_E = 69;
+		var C_KEY_CHAR_H = 72;
+		var C_KEY_CHAR_D = 68;
+		var C_KEY_CHAR_L = 76;
+		var C_KEY_CHAR_N = 78;
+		var C_KEY_CHAR_R = 82;
+		var C_KEY_CHAR_P = 80;
+	
+		JSGameEngine.C_VIEWPORT_SCALE = 0.5;			//one unit in world = 0.5 unit in viewport.
+		JSGameEngine.C_VIEWPORT_CURSOR_LENGTH = 20;		//px;
+
+		function JSGameEngine(_canvas, _context) 
+		{
+			this.canvas = _canvas;
+			this.context = this.canvas.getContext("2d");
+			this.font = "9px Verdana";
+
+			this.canvasWidth = this.canvas.width;
+			this.halfCanvasWidth = this.canvasWidth * 0.5;
+			this.canvasHeight = this.canvas.height;
+			this.halfCanvasHeight = this.canvasHeight * 0.5;
+			this.aspectRatio = this.canvasWidth / this.canvasHeight;
+			this.keyboardeventPropagation = true;
+
+			this.keyPressed = [];
+			this.keyWaitRelease = [];
+			this.onKeyDownCallback = null;
+			this.onKeyUpCallback = null;
+			this.initKeyboard();
+
+			this.times = new Array();
+			this.logTimes = false;
+			this.px = this.context.createImageData(1, 1);
+			this.pxData = this.px.data;
+
+			this.showInfo = true;
+
+			console.log("js game engine created, widht x height:", this.canvasWidth, " x ", this.canvasHeight);
+		}
+
+		JSGameEngine.prototype.start = function() 
+		{
+			onUserCreate();
+			setInterval('onUserUpdate()', 1000 / C_FPS);
+		}
+
+
+		JSGameEngine.prototype.setKeyboardCallbacks = function(_onKeyDownFunction, _onKeyUpFunction)
+		{
+			this.onKeyDownCallback = _onKeyDownFunction;
+			this.onKeyUpCallback = _onKeyUpFunction;
+		}
+
+		JSGameEngine.prototype.initKeyboard = function()
+		{
+			var finalThis = this;
+
+			for (var i = 0; i < 256; i++)
+			{
+				this.keyPressed.push(false);
+				this.keyWaitRelease.push(false);
+			}
+
+			document.onkeydown = function(event) 
+			{
+				//console.log(event);
+				finalThis.keyPressed[event.keyCode] = true;
+
+				if (finalThis.onKeyDownCallback)
+					finalThis.onKeyDownCallback(event.keyCode);
+
+				return finalThis.keyboardeventPropagation;
+			};
+			
+			document.onkeyup = function(event) 
+			{
+				finalThis.keyPressed[event.keyCode] = false;
+				finalThis.keyWaitRelease[event.keyCode] = false;
+
+				if (finalThis.onKeyUpCallback)
+					finalThis.onKeyUpCallback(event.keyCode);
+
+				return finalThis.keyboardeventPropagation;
+			}
+		}
+
+		JSGameEngine.prototype.isKeyPressed = function(_scanCode) 
+		{
+			return this.keyPressed[_scanCode];
+		}
+
+		JSGameEngine.prototype.satKeyWaitRelease = function(_scanCode) 
+		{
+			this.keyWaitRelease[_scanCode] = true;
+		}
+
+		JSGameEngine.prototype.getKeyWaitingRelease = function(_scanCode) 
+		{
+			return this.keyWaitRelease[_scanCode];
+		}
+
+		JSGameEngine.prototype.clearScreen = function() 
+		{
+			demo.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+		}
+
+		JSGameEngine.prototype.drawTriangle = function(x1, y1, x2, y2, x3, y3, style, fillColor) 
+		{
+			this.renderLine(x1, y1, x2, y2, style, fillColor);
+			this.renderLine(x2, y2, x3, y3, style, fillColor);
+			this.renderLine(x3, y3, x1, y1, style, fillColor);
+		}
+
+		JSGameEngine.prototype.fillTriangle = function(x1, y1, x2, y2, x3, y3, style, fillColor) 
+		{
+			this.context.save();
+
+			this.context.beginPath();
+		    this.context.moveTo(x1, y1);
+		    this.context.lineTo(x2, y2);
+		    this.context.lineTo(x3, y3);
+		    this.context.closePath();
+		    this.context.strokeStyle = fillColor;
+		    this.context.stroke();
+
+			this.context.fillStyle = fillColor;
+		    this.context.fill();
+
+			this.context.restore();
+		}
+
+		/*
+		JSGameEngine.prototype.putPixel = function(	x, y, r, g, b, a)
+		{
+			this.pxData[0] = r;
+			this.pxData[1] = g;
+			this.pxData[2] = b;
+			this.pxData[3] = a;
+
+			this.context.putImageData(this.px, x, y);
+		}*/
+
+		JSGameEngine.prototype.putPixel = function(	x, y, r, g, b, a)
+		{
+			this.context.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (a / 255) + ')';
+			this.context.fillRect(x, y, 1, 1);
+		}
+
+		JSGameEngine.prototype.putPixelSize = function(	x, y, r, g, b, a, size)
+		{
+			this.context.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (a / 255) + ')';
+			this.context.fillRect(x, y, size, size);
+		}
+
+		JSGameEngine.prototype.texturedTriangle = function(	x1, y1, u1,v1,w1,
+															x2, y2, u2, v2, w2,
+															x3, y3, u3, v3, w3,	texture)
+		{
+			if (texture === null)
+				return;
+
+			var detail = 0;
+			var pixColour = null;
+			var t = 0;
+
+			if (y2 < y1)
+			{
+				t=y1; y1=y2; y2=t;
+				t=x1; x1=x2; x2=t; 
+				t=u1; u1=u2; u2=t; 
+				t=v1; v1=v2; v2=t; 
+				t=w1; w1=w2; w2=t; 
+			}
+
+			if (y3 < y1)
+			{
+				t=y1; y1=y3; y3=t;
+				t=x1; x1=x3; x3=t; 
+				t=u1; u1=u3; u3=t; 
+				t=v1; v1=v3; v3=t; 
+				t=w1; w1=w3; w3=t; 
+			}
+
+			if (y3 < y2)
+			{
+				t=y2; y2=y3; y3=t;
+				t=x2; x2=x3; x3=t; 
+				t=u2; u2=u3; u3=t; 
+				t=v2; v2=v3; v3=t; 
+				t=w2; w2=w3; w3=t; 
+			}
+
+			var dy1 = y2 - y1;
+			var dx1 = x2 - x1;
+			var dv1 = v2 - v1;
+			var du1 = u2 - u1;
+			var dw1 = w2 - w1;
+
+			var dy2 = y3 - y1;
+			var dx2 = x3 - x1;
+			var dv2 = v3 - v1;
+			var du2 = u3 - u1;
+			var dw2 = w3 - w1;
+
+			var tex_u, tex_v, tex_w;
+
+			var dax_step = 0, dbx_step = 0,
+				du1_step = 0, dv1_step = 0,
+				du2_step = 0, dv2_step = 0,
+				dw1_step = 0, dw2_step = 0;
+
+			if (dy1) dax_step = dx1 / Math.abs(dy1);
+			if (dy2) dbx_step = dx2 / Math.abs(dy2);
+
+			if (dy1) du1_step = du1 / Math.abs(dy1);
+			if (dy1) dv1_step = dv1 / Math.abs(dy1);
+			if (dy1) dw1_step = dw1 / Math.abs(dy1);
+
+			if (dy2) du2_step = du2 / Math.abs(dy2);
+			if (dy2) dv2_step = dv2 / Math.abs(dy2);
+			if (dy2) dw2_step = dw2 / Math.abs(dy2);
+
+			if (dy1)
+			{
+				for (var i = y1; i <= y2; i+=C_TEXTURE_QUALITY)
+				{
+					var ax = x1 + (i - y1) * dax_step;
+					var bx = x1 + (i - y1) * dbx_step;
+
+					var tex_su = u1 + (i - y1) * du1_step;
+					var tex_sv = v1 + (i - y1) * dv1_step;
+					var tex_sw = w1 + (i - y1) * dw1_step;
+
+					var tex_eu = u1 + (i - y1) * du2_step;
+					var tex_ev = v1 + (i - y1) * dv2_step;
+					var tex_ew = w1 + (i - y1) * dw2_step;
+
+					if (ax > bx)
+					{
+						t=ax; 		ax=bx; 			bx=t;
+						t=tex_su; 	tex_su=tex_eu; 	tex_eu=t;
+						t=tex_sv; 	tex_sv=tex_ev; 	tex_ev=t;
+						t=tex_sw; 	tex_sw=tex_ew; 	tex_ew=t;
+					}
+
+					tex_u = tex_su;
+					tex_v = tex_sv;
+					tex_w = tex_sw;
+
+					var tstep = 1 / (bx - ax);
+					var t = 0;
+
+					for (var j = ax; j < bx; j+=C_TEXTURE_QUALITY)
+					{
+						tex_u = (1 - t) * tex_su + t * tex_eu;
+						tex_v = (1 - t) * tex_sv + t * tex_ev;
+						tex_w = (1 - t) * tex_sw + t * tex_ew;
+						
+						pixColour = this.getTexturePixelScaled(texture, tex_u / tex_w, tex_v / tex_w);
+						this.putPixelSize(j, i, pixColour[0], pixColour[1], pixColour[2], pixColour[3], C_TEXTURE_QUALITY);
+
+						/*
+						if (tex_w > pDepthBuffer[i*ScreenWidth() + j])
+						{
+							pixColour = this.getTexturePixelScaled(texture, tex_u / tex_w, tex_v / tex_w);
+							this.putPixelSize(j, i, pixColour[0], pixColour[1], pixColour[2], pixColour[3], C_TEXTURE_QUALITY);
+						}*/
+			
+						t += tstep * C_TEXTURE_QUALITY;
+					}
+
+				}
+			}
+
+			dy1 = y3 - y2;
+			dx1 = x3 - x2;
+			dv1 = v3 - v2;
+			du1 = u3 - u2;
+			dw1 = w3 - w2;
+
+			if (dy1) dax_step = dx1 / Math.abs(dy1);
+			if (dy2) dbx_step = dx2 / Math.abs(dy2);
+
+			du1_step = 0, dv1_step = 0;
+			if (dy1) du1_step = du1 / Math.abs(dy1);
+			if (dy1) dv1_step = dv1 / Math.abs(dy1);
+			if (dy1) dw1_step = dw1 / Math.abs(dy1);
+
+			if (dy1)
+			{
+				for (var i = y2; i <= y3; i+=C_TEXTURE_QUALITY)
+				//for (var i = y2; i <= y2; i++)
+				{
+					var ax = x2 + (i - y2) * dax_step;
+					var bx = x1 + (i - y1) * dbx_step;
+
+					var tex_su = u2 + (i - y2) * du1_step;
+					var tex_sv = v2 + (i - y2) * dv1_step;
+					var tex_sw = w2 + (i - y2) * dw1_step;
+
+					var tex_eu = u1 + (i - y1) * du2_step;
+					var tex_ev = v1 + (i - y1) * dv2_step;
+					var tex_ew = w1 + (i - y1) * dw2_step;
+
+					if (ax > bx)
+					{
+						t=ax; 		ax=bx; 			bx=t;
+						t=tex_su; 	tex_su=tex_eu; 	tex_eu=t;
+						t=tex_sv; 	tex_sv=tex_ev; 	tex_ev=t;
+						t=tex_sw; 	tex_sw=tex_ew; 	tex_ew=t;
+					}
+
+					tex_u = tex_su;
+					tex_v = tex_sv;
+					tex_w = tex_sw;
+
+					var tstep = 1 / (bx - ax);
+					var t = 0;
+
+					for (var j = ax; j < bx; j+=C_TEXTURE_QUALITY)
+					{
+						tex_u = (1 - t) * tex_su + t * tex_eu;
+						tex_v = (1 - t) * tex_sv + t * tex_ev;
+						tex_w = (1 - t) * tex_sw + t * tex_ew;
+
+						pixColour = this.getTexturePixelScaled(texture, tex_u / tex_w, tex_v / tex_w);
+						this.putPixelSize(j, i, pixColour[0], pixColour[1], pixColour[2], pixColour[3], C_TEXTURE_QUALITY);
+
+						/*
+						if (tex_w > pDepthBuffer[i*ScreenWidth() + j])
+						{
+							pixColour = this.getTexturePixelScaled(texture, tex_u / tex_w, tex_v / tex_w);
+							this.putPixelSize(j, i, pixColour[0], pixColour[1], pixColour[2], pixColour[3], C_TEXTURE_QUALITY);
+						}
+						*/
+			
+						t += tstep * C_TEXTURE_QUALITY;
+					}
+				}	
+			}		
+		}
+
+		JSGameEngine.prototype.getTexturePixelScaled = function(imgData, x, y) 
+		{
+			var px = x * imgData.width;
+			var py = y * imgData.height;
+			//console.log("u,v=", x, ",", y, "  pu,pv=", px, ",", py);
+
+			//console.log("pu,pv=", px, ",", py);
+			return this.getTexturePixel(imgData, px, py);
+		}
+
+		JSGameEngine.prototype.getTexturePixel = function(imgData, x, y) 
+		{
+			x = Math.round(x, 2) % imgData.width;
+			y = Math.round(y, 2) % imgData.height;
+
+			var index = (y * imgData.width + x) * 4;
+
+			return ([	imgData.data[index],
+						imgData.data[index + 1], 
+						imgData.data[index + 2],
+						imgData.data[index + 3]
+					]);
+		}
+
+		JSGameEngine.prototype.renderLine = function(x1, y1, x2, y2, style, fillColor)
+		{
+			this.context.save();
+			this.context.beginPath();
+
+			this.context.lineWidth = style;
+			this.context.strokeStyle = fillColor;
+
+		    this.context.moveTo(x1, y1);
+		    this.context.lineTo(x2, y2);
+			this.context.stroke();
+			this.context.restore();
+		}
+
+		JSGameEngine.prototype.renderCircle = function(x1, y1, r, lineWidth, fillColor)
+		{
+			this.context.save();
+			this.context.beginPath();
+
+			this.context.strokeStyle = fillColor;
+			this.context.lineWidth = lineWidth;
+			this.context.fillStyle = fillColor;
+
+		    this.context.arc(x1, y1, r, 0, 2 * Math.PI, false);
+			this.context.fill();
+			this.context.stroke();
+			this.context.restore();
+		}
+
+		JSGameEngine.prototype.draw2DAxis = function(fillColor) 
+		{
+			this.renderLine(0, this.halfCanvasHeight, this.canvasWidth, this.halfCanvasHeight, 1, fillColor);
+			this.renderLine(this.halfCanvasWidth, 0, this.halfCanvasWidth, this.canvasHeight, 1, fillColor);
+		}
+
+		JSGameEngine.prototype.renderText = function(_cenX, _cenY, _text, _fillColor) 
+		{
+			this.context.save();
+			this.context.font = this.font;
+			this.context.fillStyle = _fillColor;
+			this.context.fillText(_text, _cenX, _cenY);
+			this.context.restore();
+		}
+
+		JSGameEngine.prototype.renderRectangle = function(_x1, _y1, _w, _h, lineWidth, fillColor)
+		{
+		   this.context.save();
+		   this.context.beginPath();
+		   this.context.lineWidth = lineWidth;
+		   this.context.strokeStyle = fillColor;
+		   this.context.rect(_x1, _y1, _w, _h);
+		   this.context.stroke();
+		   this.context.restore();
+		}
+
+		JSGameEngine.prototype.renderRectangleFill = function(_x1, _y1, _w, _h, lineWidth, fillColor)
+		{
+		   this.context.save();
+		   this.context.beginPath();
+		   this.context.lineWidth = 0;
+		   this.context.fillStyle = fillColor;
+		   this.context.rect(_x1, _y1, _w, _h);
+		   this.context.fill();
+		   this.context.restore();
+		}
+
+		JSGameEngine.prototype.rgbaToColor = function(_r, _g, _b, _a) 
+		{
+			var r = _r % 256;
+			var g = _g % 256;
+			var b = _b % 256;
+
+ 			var result = "rgba(" + r.toString() + "," + g.toString() + "," + b.toString() + "," + _a.toString()+")";
+			
+			return result;
+		}
+
+		JSGameEngine.prototype.graToRad = function(grados)
+		{
+			return grados * Math.PI / 180;
+		}
+
+		JSGameEngine.prototype.radToGra = function(radians)
+		{
+			return 180 * radians / Math.PI;
+		}
+
+		JSGameEngine.prototype.startTime = function(_key)
+		{
+			var foundItem = this.chFoundTimeKey(_key);
+
+			if (foundItem === null)
+			{
+				foundItem = {key:_key, date: null, totalTime: 0};
+				this.times.push(foundItem);
+			}
+			
+			foundItem.totalTime = 0;
+			foundItem.date = Date.now();
+		}
+
+		JSGameEngine.prototype.showTimes = function(_value)
+		{
+			this.logTimes = _value;
+		}
+
+		JSGameEngine.prototype.showTimeDiff = function(_key)
+		{
+			this.addTimeDiff(_key);
+
+			if (this.logTimes === false)
+				return;
+
+			var foundItem = this.chFoundTimeKey(_key);
+			if (foundItem !== null)
+			{
+				console.log("Timediff ", foundItem.key, ":", foundItem.totalTime);
+			}
+			else
+			{
+				console.log("Timediff ", _key, ": not found");
+			}
+		}
+
+		JSGameEngine.prototype.getTimeDiff = function(_key)
+		{
+			var returnValue = "";
+
+			var foundItem = this.chFoundTimeKey(_key);
+			if (foundItem !== null)
+				returnValue = foundItem.totalTime;
+
+			return returnValue;
+		}
+
+		JSGameEngine.prototype.addTimeDiff = function(_key)
+		{
+			var foundItem = this.chFoundTimeKey(_key);
+			if (foundItem !== null)
+			{
+				foundItem.totalTime += (Date.now() - foundItem.date);
+				foundItem.date = Date.now();
+			}
+		}
+
+		JSGameEngine.prototype.chFoundTimeKey = function(_key)
+		{
+			var foundItem = null;
+
+			for (var i = 0; i < this.times.length && foundItem === null; i++) 
+				if (this.times[i].key === _key)
+					foundItem = this.times[i];
+
+			return foundItem;
+		}
+
+		JSGameEngine.prototype.chClearArray = function(_array)
+		{
+			if (_array != null && _array.length > 0)
+			{
+				_array.splice(0, _array.length);	
+			}
+		}
+
+		JSGameEngine.prototype.swap = function(_array)
+		{
+			if (_array != null && _array.length > 0)
+			{
+				_array.splice(0, _array.length);	
+			}
+		}
+
+		JSGameEngine.prototype.toggleInfo = function()
+		{
+			this.showInfo = !this.showInfo;
+		}
+
+		/* -------------------------------------------------------------------- */
+		function Space() 
+		{
+			this.accumulativeMatrix = this.createMatrixIdentity();
+			this.worldMatrix = this.createMatrixIdentity();
+			this.viewMatrix = this.createMatrixIdentity();
+			this.projectionMatrix = this.createMatrixIdentity();
+			this.screenMatrix = this.createMatrixIdentity();
+			
+			this.camera = new Vector(0, 0, 0);
+			this.cameraYaw = 0;
+			this.cameraXaw = 0;
+			this.camera = new Vector(0, 0, 0);
+			this.lightDirection = new Vector(0, 0, 0);
+			this.lightDirection.normalize();
+
+			this.tmpTriangleNormalVector = new Vector(0, 0, 0);
+
+			this.normalVectorSize = 15;
+			this.normalsVisible = false;
+			this.linesVisible = false;
+			this.wireframeMode = false;
+
+			this.meshCollection = new Array();
+
+			this.perspectiveProjection = true;
+
+			this.stats_triangles = 0;
+			this.stats_shownTriangles = 0;
+		}
+
+		Space.prototype.enablePerspectiveProjection = function() 
+		{
+			this.perspectiveProjection = true;
+		}
+
+		Space.prototype.enableIsometricProjection = function() 
+		{
+			this.perspectiveProjection = false;
+		}
+
+		Space.prototype.isEnabledPerspectiveProjection = function() 
+		{
+			return (this.perspectiveProjection === true);
+		}
+
+		Space.prototype.isEnableIsometricProjection = function() 
+		{
+			return (this.perspectiveProjection === false);
+		}
+
+		Space.prototype.setNormalsVisible = function(_value) 
+		{
+			this.normalsVisible = _value;
+		}
+
+		Space.prototype.getNormalsVisible = function() 
+		{
+			return this.normalsVisible;
+		}
+
+		Space.prototype.setLinesVisible = function(_value) 
+		{
+			this.linesVisible = _value;
+		}
+
+		Space.prototype.getLinesVisible = function() 
+		{
+			return this.linesVisible;
+		}
+
+		Space.prototype.setWireframeMode = function(_value) 
+		{
+			this.wireframeMode = _value;
+		}
+
+		Space.prototype.getWireframeMode = function() 
+		{
+			return this.wireframeMode;
+		}
+
+		Space.prototype.setLight = function(_x, _y, _z) 
+		{
+			this.lightDirection.x = _x;
+			this.lightDirection.y = _y;
+			this.lightDirection.z = _z;
+
+			this.lightDirection.normalize();
+		}
+
+		Space.prototype.setCamera = function(_x, _y, _z) 
+		{
+			this.camera.x = Math.round(_x);
+			this.camera.y = Math.round(_y);
+			this.camera.z = Math.round(_z);
+		}
+
+		Space.prototype.resetAccumulative = function() 
+		{
+			this.accumulativeMatrix = this.createMatrixIdentity();
+		}
+
+		Space.prototype.setWorldMatrix = function(_matrix) 
+		{
+			this.worldMatrix = _matrix;
+		}
+
+		Space.prototype.setViewMatrix = function(_matrix) 
+		{
+			this.viewMatrix = _matrix;
+		}
+
+		Space.prototype.setProjectionMatrix = function(_matrix) 
+		{
+			this.projectionMatrix = _matrix;
+		}
+
+		Space.prototype.setScreenMatrix = function(_matrix) 
+		{
+			this.screenMatrix = _matrix;
+		}
+
+		Space.prototype.getCamera = function() 
+		{
+			return this.camera;
+		}
+
+		Space.prototype.updateIsometricCamera = function(_xaw, _yaw)
+		{
+			var zoom = this.getCamera().length() * -1;
+
+			var positionVector = space.getLookAtVector();
+			positionVector.mul(zoom);
+
+			space.setCamera(positionVector.x, positionVector.y, positionVector.z);
+
+			/*			
+			var h = positionVector.length();
+			var ea = Math.asin(positionVector.y / h) * -1;
+			console.log(ea, _elevationAngle);
+
+			console.log(	(positionVector.x).toFixed(2), 
+							(positionVector.y).toFixed(2),
+							(positionVector.z).toFixed(2),
+							"e=", demo.radToGra(_elevationAngle).toFixed(2), 
+							"ca=", demo.radToGra(_clockAngle).toFixed(2));		
+			*/				
+		}
+
+		Space.prototype.multiplyToCurrent = function(m1) 
+		{
+			this.accumulativeMatrix = this.matrixMultiply(this.accumulativeMatrix, m1);
+		}
+
+		Space.prototype.matrixMultiply = function(m1, m2) 
+		{
+			var result = this.createMatrixIdentity();
+
+			var width = m1[0].length;
+			var height = m1.length;
+
+			if (width != m2.length) {
+				// error
+			}
+
+			for (var x = 0; x < width; x++) {
+				for (var y = 0; y < height; y++) {
+					var sum = 0;
+
+					for (var z = 0; z < width; z++) {
+						sum += m1[y][z] * m2[z][x];
+					}
+
+					result[y][x] = sum;
+				}
+			}
+
+			return result;
+		}
+
+		Space.createMatrixIdentity = function () 
+		{
+			return [
+				[1, 0, 0, 0],
+				[0, 1, 0, 0],
+				[0, 0, 1, 0],
+				[0, 0, 0, 1]
+			];
+		}
+
+		Space.prototype.createMatrixIdentity = function() 
+		{
+			return Space.createMatrixIdentity();
+		}
+
+		/*
+		Space.cloneMatrix = function (_fromMat, _toMat) 
+		{
+			_fromMat	
+			return [
+				[1, 0, 0, 0],
+				[0, 1, 0, 0],
+				[0, 0, 1, 0],
+				[0, 0, 0, 1]
+			];
+		}*/
+
+		Space.prototype.createScaleMatrix = function(x, y, z) 
+		{
+			return [
+				[x, 0, 0, 0],
+				[0, y, 0, 0],
+				[0, 0, z, 0],
+				[0, 0, 0, 1]
+			];
+		}
+		
+		Space.prototype.createTranslateMatrix = function(x, y, z) 
+		{
+			return [
+				[1, 0, 0, 0],
+				[0, 1, 0, 0],
+				[0, 0, 1, 0],
+				[x, y, z, 1]
+			];
+		}
+
+		Space.prototype.createRotateXMatrix = function(x) 
+		{
+				var cosX = Math.cos(x);
+				var sinX = Math.sin(x);
+				var rotX = [
+					[1, 0, 0, 0],
+					[0, cosX, -sinX, 0],
+					[0, sinX, cosX,0],
+					[0, 0, 0, 1]
+				];	
+
+				return rotX;				
+		}
+
+		Space.prototype.createRotateYMatrix = function(y) 
+		{
+				var cosY = Math.cos(y);
+				var sinY = Math.sin(y);
+				var rotY = [
+					[cosY, 0, sinY, 0],
+					[0, 1, 0, 0],
+					[-sinY, 0, cosY, 0],
+					[0, 0, 0, 1]
+				];	
+				
+				return rotY;				
+		}
+
+		Space.prototype.createRotateZMatrix = function(z) 
+		{
+				var cosZ = Math.cos(z);
+				var sinZ = Math.sin(z);
+				var rotZ = [
+					[cosZ, -sinZ, 0, 0],
+					[sinZ, cosZ, 0, 0],
+					[0, 0, 1, 0],
+					[0, 0, 0, 1]
+				];
+
+				return rotZ;
+		}		
+
+		Space.prototype.createOrtograpichProjectionMatrix = function(fAspectRatio, camera)
+		{
+			var m = camera.length();
+		
+			//console.log(m);
+			var x = 1 / m;
+			var y = 1 / m;
+			var z = 1 / m;
+
+			var returnMatrix = [
+				[x * fAspectRatio, 0, 0, 0],
+				[0, y, 0, 0],
+				[0, 0, z, 0],
+				[0, 0, 0, 1]
+			];
+
+			return returnMatrix;
+		}
+
+		Space.prototype.createProjectionMatrix = function(fFovDegrees, fAspectRatio, fNear, fFar)
+		{
+			var returnMatrix = [
+				[1, 0, 0, 0],
+				[0, 1, 0, 0],
+				[0, 0, 1, 0],
+				[0, 0, 0, 1]
+			];
+			
+			var fFovRad = 1.0 / Math.tan(fFovDegrees * 0.5 / 180.0 * 3.14159);
+			returnMatrix[0][0] = fAspectRatio * fFovRad;
+			returnMatrix[1][1] = fFovRad;
+			returnMatrix[2][2] = fFar / (fFar - fNear);
+			returnMatrix[3][2] = (-fFar * fNear) / (fFar - fNear);
+			returnMatrix[2][3] = 1;
+			returnMatrix[3][3] = 0;
+
+			return returnMatrix;
+		}
+
+		Space.prototype.createPointAtInverseMatrix = function(pos, _xaw, _yaw) 
+		{
+			var matCamera = this.createPointAtMatrix(pos, _xaw, _yaw);
+			return this.createQuickInverseMatrix(matCamera);
+		}
+
+		Space.prototype.getLookAtVector = function() 
+		{
+			return this.getLookAtVectorAt(this.cameraXaw, this.cameraYaw);
+		}
+
+		Space.prototype.getLookAtVectorAt = function(_xaw, _yaw) 
+		{
+			var lookAt = new Vector(0, 0, 0);
+			var vTarget = new Vector(0, 0, 1);
+
+			var xawMatrix = this.createRotateXMatrix(_xaw);
+			var yawMatrix = this.createRotateYMatrix(_yaw);
+
+			multiplyMatrixVectorOver(vTarget, xawMatrix);
+			multiplyMatrixVectorOver(vTarget, yawMatrix);
+
+			lookAt.clone(vTarget);
+
+			return lookAt;
+		}
+
+		Space.prototype.createPointAtMatrix = function(pos, _xaw, _yaw) 
+		{
+			// Create "Point At" Matrix for camera
+			var vUp = new Vector(0, 1, 0);
+			var vTarget = new Vector(0, 0, 1);
+
+			var vLookDir = this.getLookAtVectorAt(_xaw, _yaw);
+			var vTarget = Vector.Add(this.getCamera(), vLookDir);
+
+			return this.createPointAtBaseMatrix(pos, vTarget, vUp);
+		}
+		
+		Space.prototype.createPointAtBaseMatrix = function(pos, target, up) 
+		{
+			// Calculate new forward direction
+			var newForward = Vector.Sub(target, pos);
+			newForward.normalize();
+
+			// Calculate new Up direction
+			var a = Vector.Mul(newForward, up.dotProduct(newForward));
+			var newUp = Vector.Sub(up, a);
+			newUp.normalize();
+
+			// New Right direction is easy, its just cross product
+			var newRight = newUp.crossProduct(newForward);
+
+			// Construct Dimensioning and Translation Matrix	
+			var result = this.createMatrixIdentity();
+
+			result[0][0] = newRight.x;	result[0][1] = newRight.y;	result[0][2] = newRight.z;	result[0][3] = 0.0;
+			result[1][0] = newUp.x;		result[1][1] = newUp.y;		result[1][2] = newUp.z;		result[1][3] = 0.0;
+			result[2][0] = newForward.x;result[2][1] = newForward.y;result[2][2] = newForward.z;result[2][3] = 0.0;
+			result[3][0] = pos.x;		result[3][1] = pos.y;		result[3][2] = pos.z;		result[3][3] = 1.0;
+
+			return result;
+		}
+
+		Space.prototype.createQuickInverseMatrix = function(_matrix) 
+		{
+			var result = this.createMatrixIdentity();
+
+			result[0][0] = _matrix[0][0]; result[0][1] = _matrix[1][0]; result[0][2] = _matrix[2][0]; result[0][3] = 0;
+			result[1][0] = _matrix[0][1]; result[1][1] = _matrix[1][1]; result[1][2] = _matrix[2][1]; result[1][3] = 0;
+			result[2][0] = _matrix[0][2]; result[2][1] = _matrix[1][2]; result[2][2] = _matrix[2][2]; result[2][3] = 0;
+
+			result[3][0] = -(_matrix[3][0] * result[0][0] + _matrix[3][1] * result[1][0] + _matrix[3][2] * result[2][0]);
+			result[3][1] = -(_matrix[3][0] * result[0][1] + _matrix[3][1] * result[1][1] + _matrix[3][2] * result[2][1]);
+			result[3][2] = -(_matrix[3][0] * result[0][2] + _matrix[3][1] * result[1][2] + _matrix[3][2] * result[2][2]);
+			result[3][3] = 1;
+
+			return result;
+		}
+	
+		/* -------------------------------------------------------------------- */
+		Space.prototype.getGrayedColorFromLight = function(_light, _triNormal, _faceColor, _meshColor)
+		{
+			var lightDotProduct = Math.min(1, _light.dotProduct(_triNormal));
+
+			var ambient = 0.0;
+			lightDotProduct = (lightDotProduct + ambient);
+			if (lightDotProduct > 1)
+				lightDotProduct = 1;
+
+			var red = Math.trunc(_meshColor.r * lightDotProduct);
+			var green = Math.trunc(_meshColor.g * lightDotProduct);
+			var blue = Math.trunc(_meshColor.b * lightDotProduct)
+			var alpha = _meshColor.a;
+			
+			var faceColor = _faceColor;
+			if (faceColor === "")
+				faceColor = demo.rgbaToColor(red, green, blue, alpha); 
+			
+			return faceColor;
+		}
+
+		/* -------------------------------------------------------------------- */
+		Space.prototype.update = function()
+		{ 
+			this.stats_triangles = 0;
+			this.stats_shownTriangles = 0;
+
+			var sceneTiranglesToRender = new Array();
+
+			demo.startTime("process");
+
+			// Precalculate general matrix. 
+			space.resetAccumulative();
+			space.multiplyToCurrent(space.createPointAtInverseMatrix(space.getCamera(), space.cameraXaw, space.cameraYaw));
+			space.setViewMatrix(space.accumulativeMatrix);
+
+			space.resetAccumulative();
+			space.multiplyToCurrent(space.createScaleMatrix(1, -1, 1));
+
+			if (space.isEnabledPerspectiveProjection() === true)
+				space.multiplyToCurrent(space.createProjectionMatrix(90, demo.aspectRatio, 0.01, 1000));
+			else
+				space.multiplyToCurrent(space.createOrtograpichProjectionMatrix(demo.aspectRatio, space.getCamera()));
+			
+			space.setProjectionMatrix(space.accumulativeMatrix);
+
+			space.resetAccumulative();
+			space.multiplyToCurrent(space.createTranslateMatrix(1, 1, 0));
+			space.multiplyToCurrent(space.createScaleMatrix(0.5 * demo.canvasWidth, 0.5 * demo.canvasHeight, 1));
+			space.setScreenMatrix(space.accumulativeMatrix);
+
+			// Calculate render data for each mesh.
+			var meshItem = null;
+			for (var i = 0; i < this.getMeshCollection().length; i++) 
+			{
+				meshItem = this.getMeshCollection()[i];
+				
+				meshItem.worldMatrix = Space.createMatrixIdentity();
+				meshItem.worldMatrix = this.matrixMultiply(meshItem.worldMatrix, space.createScaleMatrix(
+																									meshItem.getScale().x, 
+																									meshItem.getScale().y, 
+																									meshItem.getScale().z));
+
+				meshItem.worldMatrix = this.matrixMultiply(meshItem.worldMatrix, space.createRotateXMatrix(meshItem.getRotation().x));
+				meshItem.worldMatrix = this.matrixMultiply(meshItem.worldMatrix, space.createRotateYMatrix(meshItem.getRotation().y));
+				meshItem.worldMatrix = this.matrixMultiply(meshItem.worldMatrix, space.createRotateZMatrix(meshItem.getRotation().z));
+				meshItem.worldMatrix = this.matrixMultiply(meshItem.worldMatrix, space.createTranslateMatrix(
+					meshItem.getPosition().x,
+					meshItem.getPosition().y,
+					meshItem.getPosition().z));
+
+				this.createRenderData(meshItem, sceneTiranglesToRender);
+			}			
+			demo.showTimeDiff("process");
+
+			// Global Z order sorting.
+			demo.startTime("Sorting");
+			this.zOrderSorting(sceneTiranglesToRender);						
+			demo.addTimeDiff("Sorting");	
+
+			demo.showTimeDiff("dumpOri");	
+			demo.showTimeDiff("World");	
+			demo.showTimeDiff("Normal");	
+			demo.showTimeDiff("Culling");	
+			demo.showTimeDiff("Illumination");	
+			demo.showTimeDiff("Camera");	
+			demo.showTimeDiff("Clip z");	
+			demo.showTimeDiff("Projection");	
+			demo.showTimeDiff("Normalization");	
+			demo.showTimeDiff("Clip borders");	
+			demo.showTimeDiff("Z order opt");	
+			demo.showTimeDiff("Sorting");	
+			demo.showTimeDiff("Normals show");	
+
+			this.render(sceneTiranglesToRender);
+			
+			if (demo.logTimes === true)
+			{
+				console.log("Count triangles:", sceneTiranglesToRender.length, "(mesh =", this.getMeshCollection().length, ")");
+			}
+		}
+
+		Space.prototype.createRenderData = function(_mesh, _sceneTiranglesToRender)
+		{ 
+			if (_mesh === null || typeof _mesh === "undefined")
+				return;
+
+			demo.chClearArray(_mesh.renderTris);
+
+			demo.startTime("dumpOri");
+			this.copyPointsAndSetTexture(_mesh);
+			demo.addTimeDiff("dumpOri");	
+
+			// World Matrix Transform		
+			this.worldMatrix = _mesh.worldMatrix;
+
+			demo.startTime("World");
+			_mesh.renderTris = this.applyMatrixFromRenderPoints(_mesh.tris, this.worldMatrix);
+			demo.addTimeDiff("World");	
+
+			// Calculate triangles Normal
+			demo.startTime("Normal");
+			_mesh.renderTris = this.calculateAndUpdateNormalVectorFromRenderPoints(_mesh.renderTris);						
+			demo.addTimeDiff("Normal");	
+
+			// Backface culling
+			demo.startTime("Culling");
+			_mesh.renderTris = this.backFaceCulling(_mesh.renderTris, this.getCamera());						
+			demo.addTimeDiff("Culling");	
+
+			// Illumination
+			demo.startTime("Illumination");
+			_mesh.renderTris = this.trianglesColorUsingLight(_mesh.renderTris, this.lightDirection, _mesh.getColor());
+			demo.addTimeDiff("Illumination");	
+
+			// Camera: convert World Space --> View Space
+			demo.startTime("Camera");
+			_mesh.renderTris = this.applyMatrixFromRenderPoints(_mesh.renderTris, this.viewMatrix);
+			demo.addTimeDiff("Camera");	
+
+			// Clip camera plane
+			demo.startTime("Clip z");
+			_mesh.renderTris = this.clipAgainstPlane(_mesh.renderTris, new Vector(0, 0, 0.1), new Vector(0, 0, 1));
+			demo.addTimeDiff("Clip z");	
+
+			// Projection: convert 3D --> 2D
+			demo.startTime("Projection");
+			_mesh.renderTris = this.applyMatrixFromRenderPoints(_mesh.renderTris, this.projectionMatrix);
+			demo.addTimeDiff("Projection");	
+
+			// Manual normalization triangles.
+			demo.startTime("Normalization");
+			_mesh.renderTris = this.normalizePoints(_mesh.renderTris);						
+			demo.addTimeDiff("Normalization");	
+
+			// Screen: convert View Space --> Screen
+			demo.startTime("Screen");
+			_mesh.renderTris = this.applyMatrixFromRenderPoints(_mesh.renderTris, this.screenMatrix);
+			demo.addTimeDiff("Screen");	
+
+			// Clip camera screen borders
+			// Right
+			demo.startTime("Clip borders");
+			_mesh.renderTris = this.clipAgainstPlane(_mesh.renderTris,  new Vector(demo.canvasWidth - 1, 0, 0), new Vector(-1, 0, 0));
+			// Top
+			_mesh.renderTris = this.clipAgainstPlane(_mesh.renderTris,  new Vector(0, demo.canvasHeight - 1, 0), new Vector(0, -1, 0));
+			// Left
+			_mesh.renderTris = this.clipAgainstPlane(_mesh.renderTris,  new Vector(0, 0, 0), new Vector(1, 0, 0));
+			// Button
+			_mesh.renderTris = this.clipAgainstPlane(_mesh.renderTris,  new Vector(0, 0, 0), new Vector(0, 1, 0));
+			demo.addTimeDiff("Clip borders");	
+
+			// Normal proyection to show in render
+			demo.startTime("Normals show");
+			_mesh.renderTris = this.normalProjection(_mesh.renderTris);						
+			demo.addTimeDiff("Normals show");	
+
+			// Optimization to depth sorting.
+			demo.startTime("Z order opt");
+			_mesh.renderTris = this.zOrderCalculation(_mesh.renderTris);						
+			demo.addTimeDiff("Z order opt");	
+
+			// Add triangles to one huge array to perform global sorting.
+			for (var is = 0; is < _mesh.renderTris.length; is++) 
+				_sceneTiranglesToRender.push(_mesh.renderTris[is]);
+
+			//console.log("Triangles start, end: ", this.stats_triangles, ", ", _mesh.renderTris.length);
+			this.stats_triangles += _mesh.tris.length;
+			this.stats_shownTriangles += _mesh.renderTris.length;
+
+		}
+
+		Space.prototype.render = function(_sceneTiranglesToRender)
+		{ 
+			demo.startTime("draw");
+			this.drawTriangles(_sceneTiranglesToRender);
+			demo.showTimeDiff("draw");	
+		}
+
+		// Copy triangle points data to avoid lost them in matrix calculatoins.
+		Space.prototype.copyPointsAndSetTexture = function(_mesh)
+		{ 
+			var triItem = null;
+
+			for (var i = 0; i < _mesh.tris.length; i++) 
+			{
+				triItem = _mesh.tris[i];
+
+				// Dump points values.
+				 triItem.pointsRender[0].x =  triItem.p[0].x;
+				 triItem.pointsRender[0].y =  triItem.p[0].y;
+				 triItem.pointsRender[0].z =  triItem.p[0].z;
+				 triItem.pointsRender[0].w =  triItem.p[0].w;
+
+				 triItem.pointsRender[1].x =  triItem.p[1].x;
+				 triItem.pointsRender[1].y =  triItem.p[1].y;
+				 triItem.pointsRender[1].z =  triItem.p[1].z;
+				 triItem.pointsRender[1].w =  triItem.p[1].w;
+		
+				 triItem.pointsRender[2].x =  triItem.p[2].x;
+				 triItem.pointsRender[2].y =  triItem.p[2].y;
+				 triItem.pointsRender[2].z =  triItem.p[2].z;
+				 triItem.pointsRender[2].w =  triItem.p[2].w;
+
+				// Dump texture values.
+				 triItem.tRender[0].u =  triItem.t[0].u;
+				 triItem.tRender[0].v =  triItem.t[0].v;
+				 triItem.tRender[0].w =  triItem.t[0].w;
+
+				 triItem.tRender[1].u =  triItem.t[1].u;
+				 triItem.tRender[1].v =  triItem.t[1].v;
+				 triItem.tRender[1].w =  triItem.t[1].w;
+		
+				 triItem.tRender[2].u =  triItem.t[2].u;
+				 triItem.tRender[2].v =  triItem.t[2].v;
+				 triItem.tRender[2].w =  triItem.t[2].w;
+
+				 if (triItem.useTexture === false)
+				 	triItem.imgDataTexture = null;				
+				 else
+				 	triItem.imgDataTexture = _mesh.imgDataTexture;				
+
+			}
+
+			return _mesh.tris;
+		}
+
+		Space.prototype.calculateAndUpdateNormalVectorFromRenderPoints = function(_arrayTriangles)
+ 		{ 
+			var result = new Array();
+			var triItem = null;
+
+			for (var i = 0; i < _arrayTriangles.length; i++) 
+			{
+				triItem = _arrayTriangles[i];
+				triItem.calculateAndUpdateNormalVectorFromRenderPoints();
+				result.push(triItem);
+			}
+
+			return result;
+		}
+
+
+		Space.prototype.backFaceCulling = function(_arrayTriangles, _cameraVector)
+		{ 
+			var result = new Array();
+			var triItem = null;
+			var vCameraRay = null;
+
+			for (var i = 0; i < _arrayTriangles.length; i++) 
+			{
+				triItem = _arrayTriangles[i];
+
+				vCameraRay = Vector.Sub(triItem.pointsRender[0], _cameraVector)
+				if (triItem.isABackfacedTriangle(triItem.normalVector, vCameraRay) === true)
+				{
+					result.push(triItem);
+				}
+			}
+
+			return result;
+		}
+
+		Space.prototype.trianglesColorUsingLight = function(_arrayTriangles, _lightDirection, _meshColor)
+		{ 
+			var result = new Array();
+			var triItem = null;
+
+			for (var i = 0; i < _arrayTriangles.length; i++) 
+			{
+				triItem = _arrayTriangles[i];
+
+				triItem.color = this.getGrayedColorFromLight(this.lightDirection, triItem.normalVector, triItem.faceColor, _meshColor);
+
+				result.push(triItem);
+			}
+
+			return result;
+		}
+
+		Space.prototype.normalizePoints = function(_arrayTriangles)
+		{ 
+			var result = new Array();
+			var triItem = null;
+
+			for (var i = 0; i < _arrayTriangles.length; i++) 
+			{
+				triItem = _arrayTriangles[i];
+
+				// Do normalising manually. 
+				triItem.pointsRender[0].div(triItem.pointsRender[0].w);
+				triItem.pointsRender[1].div(triItem.pointsRender[1].w);
+				triItem.pointsRender[2].div(triItem.pointsRender[2].w);
+
+				triItem.tRender[0].div(triItem.pointsRender[0].w);
+				triItem.tRender[1].div(triItem.pointsRender[1].w);
+				triItem.tRender[2].div(triItem.pointsRender[2].w);
+
+				result.push(triItem);
+			}
+
+			return result;
+		}
+
+		Space.prototype.clipAgainstPlane = function(_arrayTriangles, plane_p, plane_n)
+		{ 
+			var result = new Array();
+			var triItem = null;
+			var nClippedTriangles = 0;
+			var clipped = [new Triangle(), new Triangle()];
+			var newTriangle = null;
+
+			for (var i = 0; i < _arrayTriangles.length; i++) 
+			{
+				triItem = _arrayTriangles[i];
+
+				newTriangle = Vector.Triangle_ClipAgainstPlane(plane_p, plane_n, triItem); 
+
+				if (newTriangle !== 0)
+				{
+					result.push(triItem);
+
+					if (newTriangle !== null)
+						result.push(newTriangle);
+				}
+			}
+
+			return result;
+		}
+
+		Space.prototype.applyMatrixFromRenderPoints = function(_arrayTriangles, _matrix)
+		{ 
+			var result = new Array();
+			var triItem = null;
+
+			for (var i = 0; i < _arrayTriangles.length; i++) 
+			{
+				triItem = _arrayTriangles[i];
+
+				// World Matrix Transform				
+				triItem.applyMatrixFromRenderPoints(_matrix);
+
+				result.push(triItem);
+			}
+
+			return result;
+		}
+
+		Space.prototype.zOrderCalculation = function(_arrayTriangles)
+		{ 
+			var result = new Array();
+			var triItem = null;
+
+			for (var i = 0; i < _arrayTriangles.length; i++) 
+			{
+				triItem = _arrayTriangles[i];
+
+				triItem.zAverage = (triItem.pointsRender[0].z + triItem.pointsRender[1].z + triItem.pointsRender[2].z) / 3; 
+
+				result.push(triItem);
+			}
+
+			return result;
+		}
+
+		Space.prototype.zOrderSorting = function(_arrayTriangles)
+		{ 
+			var result = new Array();
+			var triItem = null;
+
+			_arrayTriangles.sort
+			(
+				function (_t1, _t2) 
+				{
+					return _t2.zAverage - _t1.zAverage;
+				}
+			);
+
+			for (var i = 0; i < _arrayTriangles.length; i++) 
+			{
+				triItem = _arrayTriangles[i];
+				result.push(triItem);
+			}
+
+			return result;
+		}
+
+		Space.prototype.isometric = function(_arrayTriangles)
+		{
+			var result = new Array();
+			var triItem = null;
+
+			var matrixX90 = this.createRotateXMatrix(demo.graToRad(90));
+			var matrixY = this.createRotateZMatrix(demo.graToRad(45));
+			var matrixX = this.createRotateXMatrix(demo.graToRad(54));
+			//var scale = this.createScaleMatrix(0.1, 0.1, 0.1);
+
+			for (var i = 0; i < _arrayTriangles.length; i++) 
+			{
+				triItem = _arrayTriangles[i];
+
+				// World Matrix Transform				
+				//triItem.applyMatrixFromRenderPoints(scale);
+				triItem.applyMatrixFromRenderPoints(matrixX90);
+				triItem.applyMatrixFromRenderPoints(matrixY);
+				triItem.applyMatrixFromRenderPoints(matrixX);
+
+				result.push(triItem);
+			}
+
+			return result;
+		}
+
+
+		Space.prototype.normalProjection = function(_arrayTriangles)
+		{ 
+			var result = new Array();
+			var triItem = null;
+			var cx = 0;
+			var cy = 0;
+
+			for (var i = 0; i < _arrayTriangles.length; i++) 
+			{
+				triItem = _arrayTriangles[i];
+
+				if (triItem.getNormalVisible() === true)
+				{
+					triItem.normalRenderVectorO.set
+					(
+						(triItem.p[0].x + triItem.p[1].x + triItem.p[2].x) / 3, 
+						(triItem.p[0].y + triItem.p[1].y + triItem.p[2].y) / 3,
+						(triItem.p[0].z + triItem.p[1].z + triItem.p[2].z) / 3
+					);
+					multiplyMatrixVectorOver(triItem.normalRenderVectorO, this.worldMatrix);
+
+					triItem.normalRenderVectorT.clone(triItem.normalVector);
+					triItem.normalRenderVectorT.mul(0.2);
+					triItem.normalRenderVectorT.add(triItem.normalRenderVectorO);
+
+					// Camera: convert World Space --> View Space
+					multiplyMatrixVectorOver(triItem.normalRenderVectorO, this.viewMatrix);
+					multiplyMatrixVectorOver(triItem.normalRenderVectorT, this.viewMatrix);
+
+					// 3D to 2D				
+					multiplyMatrixVectorOver(triItem.normalRenderVectorO, this.projectionMatrix);
+					multiplyMatrixVectorOver(triItem.normalRenderVectorT, this.projectionMatrix);
+
+					// Normalize
+					triItem.normalRenderVectorO.div(triItem.normalRenderVectorO.w);
+					triItem.normalRenderVectorT.div(triItem.normalRenderVectorT.w);
+
+					// Screen
+					multiplyMatrixVectorOver(triItem.normalRenderVectorO, this.screenMatrix);
+					multiplyMatrixVectorOver(triItem.normalRenderVectorT, this.screenMatrix);
+				}
+				result.push(triItem);
+			}
+
+			return result;
+		}
+
+		Space.prototype.clipTriangles = function(_triangles)
+		{ 
+			// Clip triangles against all four screen edges, this could yield
+			// a bunch of triangles, so create a queue that we traverse to 
+			//  ensure we only test new triangles generated against planes
+			var listTriangles = new Array();
+			var clipped = [new Triangle(), new Triangle()];
+			var triClipped = null;
+			var triangleItem = null;
+			var nTrisToAdd = 0;
+			var nNegativeTris = 0;
+
+			// Loop through all transformed, viewed, projected, and sorted triangles
+			for (var i = 0; i < _triangles.length; i++) 
+			{
+				triangleItem = _triangles[i];
+
+				nNegativeTris = 0;
+				for (var p = 0; p < 4; p++)
+				{
+					nTrisToAdd = 0;
+
+					switch (p)
+					{
+						// screen right
+						case 0:	
+							nTrisToAdd = Vector.Triangle_ClipAgainstPlane(new Vector(demo.canvasWidth - 1, 0, 0), new Vector(-1, 0, 0), triangleItem, clipped[0], clipped[1]); 
+						break;
+
+						// screen top
+						case 1:	
+							nTrisToAdd = Vector.Triangle_ClipAgainstPlane(new Vector(0, demo.canvasHeight - 1, 0), new Vector(0, -1, 0), triangleItem, clipped[0], clipped[1]); 
+						break;
+						
+						// screen left
+						case 2:	
+							nTrisToAdd = Vector.Triangle_ClipAgainstPlane(new Vector(0, 0, 0), new Vector(1, 0, 0), triangleItem, clipped[0], clipped[1]); 
+						break;
+
+						// screen bottom
+						case 3:	
+							nTrisToAdd = Vector.Triangle_ClipAgainstPlane(new Vector(0, 0, 0), new Vector(0, 1, 0), triangleItem, clipped[0], clipped[1]); 
+						break;
+					}
+
+					if (nTrisToAdd === -1)
+					{
+						nNegativeTris++;
+					}
+					else
+					{
+						// Clipping may yield a variable number of triangles, so
+						// add these new ones to the back of the queue for subsequent
+						// clipping against next planes
+						for (var w = 0; w < nTrisToAdd; w++)
+						{
+							triClipped = new Triangle();
+							triClipped.clone(clipped[w]);
+							listTriangles.push(triClipped);
+						}
+					}
+				}
+
+				if (nNegativeTris === 4)
+				{
+					//triClipped = new Triangle();
+					//triClipped.clone(clipped[0]);
+					listTriangles.push(triangleItem);
+				}
+			}
+
+			return listTriangles;
+		}
+
+		Space.prototype.drawTriangles = function(_listTriangles)
+		{ 
+			var step = 1;
+			if (_listTriangles.length > 1000)
+				step = Math.round(_listTriangles.length / 1000);
+
+			var p0 = null;
+			var p1 = null;
+			var p2 = null;
+			var t = null;
+			var normO = null;
+			var normT = null;
+
+			for (var i = 0; i < _listTriangles.length; i++) 
+			{
+				p0 = _listTriangles[i].pointsRender[0];
+				p1 = _listTriangles[i].pointsRender[1];
+				p2 = _listTriangles[i].pointsRender[2];
+				t0 = _listTriangles[i].tRender[0];
+				t1 = _listTriangles[i].tRender[1];
+				t2 = _listTriangles[i].tRender[2];
+				
+				normO = _listTriangles[i].normalRenderVectorO;
+				normT = _listTriangles[i].normalRenderVectorT;
+				sprTex1 = null;
+
+				if (this.getWireframeMode() === false)
+				{
+					if (_listTriangles[i].imgDataTexture !== null)
+					{
+						demo.texturedTriangle(p0.x, p0.y, t0.u, t0.v, t0.w,
+											  p1.x, p1.y, t1.u, t1.v, t1.w,
+											  p2.x, p2.y, t2.u, t2.v, t2.w, _listTriangles[i].imgDataTexture);
+					}
+					else
+					{
+						demo.fillTriangle(	p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, PIXEL_SOLID, _listTriangles[i].color);
+					}
+				
+					if (this.getLinesVisible() === true)
+						demo.drawTriangle(	p0.x, p0.y, p1.x, p1.y, p2.x, p2.y,	PIXEL_SOLID, "yellow");
+				}
+				else
+				{
+					demo.drawTriangle(	p0.x, p0.y, p1.x, p1.y, p2.x, p2.y,	PIXEL_SOLID, "yellow");
+				}
+			}
+
+			if (this.getNormalsVisible() === true)
+			{
+
+				for (var i = 0; i < _listTriangles.length; i++) 
+				{
+					p0 = _listTriangles[i].pointsRender[0];
+					p1 = _listTriangles[i].pointsRender[1];
+					p2 = _listTriangles[i].pointsRender[2];
+					t0 = _listTriangles[i].tRender[0];
+					t1 = _listTriangles[i].tRender[1];
+					t2 = _listTriangles[i].tRender[2];
+					
+					normO = _listTriangles[i].normalRenderVectorO;
+					normT = _listTriangles[i].normalRenderVectorT;
+					sprTex1 = null;
+
+					if (_listTriangles[i].getNormalVisible() === true)
+					{
+						demo.renderLine(normO.x, normO.y, normT.x, normT.y, 2, "green");
+						//demo.renderCircle(normT.x, normT.y,  2, 2, "green");					
+					}
+				}
+			}
+		}
+
+		Space.prototype.renderLookAt = function(vCamera, vLookDir, rotX, rotY, rotZ)
+		{ 
+			if (demo.showInfo === false)
+				return;
+
+			// Viewport
+			var rectSize = 100;
+			var r = {x1:demo.canvasWidth - rectSize, y1: 0, x2: demo.canvasWidth, y2: demo.canvasHeight};
+			var rmx = r.x1 + rectSize / 2;
+			var rmy = r.y1 + rectSize / 2;
+
+			demo.renderRectangle(r.x1, r.y1, rectSize, rectSize, 1, "green");
+			demo.renderLine(rmx, r.y1, rmx, r.y1 + rectSize, 1, "green");
+			demo.renderLine(r.x1, rmy, r.x1 + rectSize, rmy, 1, "green");
+
+			// Camera position.			
+			var cameraPosText = "" + Math.round(vCamera.x) + "," + Math.round(vCamera.y) + "," + Math.round(vCamera.z) + "";
+			demo.renderText(r.x1, r.y1 + rectSize + 10, cameraPosText, "green");
+
+			// Object rotation angles.		
+			var cameraPosText = "" + Math.round(demo.radToGra(rotX)) + "," + Math.round(demo.radToGra(rotY)) + "," + Math.round(demo.radToGra(rotZ)) + "";
+			demo.renderText(r.x1 + rectSize - 55, r.y1 + rectSize + 10, cameraPosText, "green");
+
+			// Help
+			demo.renderText(r.x1, r.y1 + rectSize + 30, "Q,W,E,A,S,D: rotate", "white");
+			demo.renderText(r.x1, r.y1 + rectSize + 40, "ARROWS: camera", "white");
+			demo.renderText(r.x1, r.y1 + rectSize + 50, "CTRL: camera Y", "white");
+			demo.renderText(r.x1, r.y1 + rectSize + 60, "N: normals", "white");
+			demo.renderText(r.x1, r.y1 + rectSize + 70, "R: wireframe", "white");
+			demo.renderText(r.x1, r.y1 + rectSize + 80, "L: lines", "white");
+			demo.renderText(r.x1, r.y1 + rectSize + 90, "H: toggle info", "white");
+
+			// Cursor
+			var k = JSGameEngine.C_VIEWPORT_SCALE;
+
+			var mw = demo.halfCanvasWidth;
+			var mh = demo.halfCanvasHeight;
+			
+			var x1 = vCamera.x;
+			var y1 = vCamera.z;
+
+			var x2 = x1 * k + (vLookDir.x * JSGameEngine.C_VIEWPORT_CURSOR_LENGTH);
+			var y2 = y1 * k + (vLookDir.z * JSGameEngine.C_VIEWPORT_CURSOR_LENGTH);
+
+			demo.renderLine(rmx + x1 * k, rmy - y1 * k, rmx + x2, rmy - y2, 1, FG_WHITE);
+			demo.renderCircle(rmx + x1 * k, rmy - y1 * k, 2, 0, FG_WHITE);
+
+			// Stats			
+			var stats = "Triangles: " + this.stats_shownTriangles + " / " + Math.round(this.stats_triangles);
+			demo.renderText(0, 10, stats, "white");
+
+			var statsTime = "T.pro: " + demo.getTimeDiff("process") + ", T.ren: " + demo.getTimeDiff("draw") + ", T.z calc: " + demo.getTimeDiff("performAnimation");
+			demo.renderText(0, 20, statsTime, "white");
+		}
+
+		Space.prototype.getMeshCollection = function()
+		{ 
+			return this.meshCollection;
+		}
+
+		Space.prototype.clearMeshCollection = function()
+		{ 
+			return demo.chClearArray(this.meshCollection);
+		}
+
+		/* -------------------------------------------------------------------- */
+		function Vector2D(u, v, w) 
+		{
+			this.u = u;
+			this.v = v;
+			this.w = w;
+		}
+
+		Vector2D.prototype.clone = function(v) 
+		{
+			this.u = v.u;
+			this.v = v.v;
+			this.w = v.w;
+		}
+
+		Vector2D.prototype.div = function(k) 
+		{
+			this.u /= k;
+			this.v /= k;
+			this.w /= k;
+		}
+
+
+		function Vector(x, y, z, w) 
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.w = w;
+			this.updated = false;
+			this.colored = false;
+		}
+
+		Vector.prototype.clone = function(v) 
+		{
+			this.x = v.x;
+			this.y = v.y;
+			this.z = v.z;
+			this.w = v.w;
+			this.updated = v.updated;
+			this.colored = v.colored;
+  		}
+
+		Vector.Clone = function (v) 
+		{
+			var result = new Vector(v.x, v.y, v.z, v.w);
+			result.updated = v.updated;
+			result.colored = v.colored;
+			return result;  
+		}
+
+		Vector.Sub = function (v1, v2) 
+		{
+			var result = Vector.Clone(v1);
+			result.sub(v2);
+			return result;  
+		}
+
+		Vector.Add = function (v1, v2) 
+		{
+			var result = Vector.Clone(v1);
+			result.add(v2);
+			return result;  
+		}
+
+		Vector.Mul = function (v1, k) 
+		{
+			var result = Vector.Clone(v1);
+			result.mul(k);
+			return result;  
+		}
+
+		Vector.Div = function (v1, k) 
+		{
+			var result = Vector.Clone(v1);
+			result.div(k);
+			return result;  
+		}
+
+		Vector.Normalize = function (v1) 
+		{
+			var result = Vector.Clone(v1);
+			result.normalize();
+			return result;  
+		}
+
+		Vector.prototype.set = function(x, y, z, w) 
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.w = w;
+		}
+
+		Vector.prototype.dotProduct = function(v2) 
+		{
+			return this.x * v2.x + this.y * v2.y + this.z * v2.z;
+		}
+
+		Vector.prototype.crossProduct = function(v2) 
+		{
+			var v = new Vector(0, 0, 0);
+
+			v.x = this.y * v2.z - this.z * v2.y;
+			v.y = this.z * v2.x - this.x * v2.z;
+			v.z = this.x * v2.y - this.y * v2.x;
+			
+			return v;
+		}
+
+		Vector.IntersectPlane = function(plane_p, plane_n, lineStart, lineEnd, _t)
+		{
+			plane_n.normalize();
+			var plane_d = -plane_n.dotProduct(plane_p);
+			var ad = lineStart.dotProduct(plane_n);
+			var bd = lineEnd.dotProduct(plane_n);
+			var t = (-plane_d - ad) / (bd - ad);
+			_t.refValue = t;
+			var lineStartToEnd = Vector.Sub(lineEnd, lineStart);
+			var lineToIntersect = Vector.Mul(lineStartToEnd, t);
+			return Vector.Add(lineStart, lineToIntersect);
+		}
+
+		// Return signed shortest distance from point to plane, plane normal must be normalised
+		Vector.Dist = function (point, plane_n, plane_p) 
+		{
+			var dotProd = plane_n.dotProduct(plane_p);
+			return (plane_n.x * point.x + plane_n.y * point.y + plane_n.z * point.z - dotProd);
+		}
+
+		Vector.Triangle_ClipAgainstPlane = function(plane_p, plane_n, in_tri, out_tri1, out_tri2)
+		{
+			var result = null;
+
+			// Posible optimizatoin, make point as static array.
+			var points = new Array(new Vector(), new Vector(), new Vector());
+
+			// Posible optimizatoin, make point as static array.
+			var textures = new Array(new Vector2D(), new Vector2D(), new Vector2D());
+
+			var t = {refValue: 0};
+
+			// Make sure plane normal is indeed normal
+			plane_n.normalize();
+
+			// Create two temporary storage arrays to classify points either side of plane
+			// If distance sign is positive, point lies on "inside" of plane
+			var inside_points = new Array();  
+			var nInsidePointCount = 0;
+			var outside_points = new Array(); 
+			var nOutsidePointCount = 0;
+			var inside_tex = new Array();
+			var nInsideTexCount = 0;
+			var outside_tex = new Array(); 
+			var nOutsideTexCount = 0;
+
+			// Get signed distance of each point in triangle to plane
+			var d0 = Vector.Dist(in_tri.pointsRender[0], plane_n, plane_p);
+			var d1 = Vector.Dist(in_tri.pointsRender[1], plane_n, plane_p);
+			var d2 = Vector.Dist(in_tri.pointsRender[2], plane_n, plane_p);
+
+			points[0].clone(in_tri.pointsRender[0]);
+			points[1].clone(in_tri.pointsRender[1]);
+			points[2].clone(in_tri.pointsRender[2]);
+
+			textures[0].clone(in_tri.tRender[0]);
+			textures[1].clone(in_tri.tRender[1]);
+			textures[2].clone(in_tri.tRender[2]);
+
+			if (d0 >= 0) 
+			{ 
+				inside_points.push(points[0]) 
+				nInsidePointCount++;
+				inside_tex.push(textures[0]); 	
+				nInsideTexCount++
+			}
+			else 
+			{ 
+				outside_points.push(points[0]); 
+				nOutsidePointCount++;
+				outside_tex.push(textures[0]);
+				nOutsideTexCount++
+			}
+
+			if (d1 >= 0) 
+			{ 
+				inside_points.push(points[1]) 
+				nInsidePointCount++;
+				inside_tex.push(textures[1]); 	
+				nInsideTexCount++
+			}
+			else 
+			{ 
+				outside_points.push(points[1]); 
+				nOutsidePointCount++;
+				outside_tex.push(textures[1]);
+				nOutsideTexCount++
+			}
+			
+			if (d2 >= 0) 
+			{ 
+				inside_points.push(points[2]) 
+				nInsidePointCount++;
+				inside_tex.push(textures[2]); 	
+				nInsideTexCount++				
+			}
+			else 
+			{ 
+				outside_points.push(points[2]); 
+				nOutsidePointCount++;
+				outside_tex.push(textures[2]);
+				nOutsideTexCount++				
+			}
+
+			// Now classify triangle points, and break the input triangle into 
+			// smaller output triangles if required. There are four possible
+			// outcomes...
+
+			if (nInsidePointCount == 0)
+			{
+				// All points lie on the outside of plane, so clip whole triangle
+				// It ceases to exist
+				return 0; // No returned triangles are valid
+			}
+
+			if (nInsidePointCount == 3)
+			{
+				// All points lie on the inside of plane, so do nothing
+				// and allow the triangle to simply pass through
+				//out_tri1.clone(in_tri);
+				return null; // Just the one returned original triangle is valid
+			}
+
+			if (nInsidePointCount == 1 && nOutsidePointCount == 2)
+			{
+				// Triangle should be clipped. As two points lie outside
+				// the plane, the triangle simply becomes a smaller triangle
+
+				// Copy appearance info to new triangle
+				//out_tri1 = new Triangle();
+				//out_tri1.clone(in_tri); 
+
+				// The inside point is valid, so keep that...
+				in_tri.pointsRender[0].clone(inside_points[0]);
+				in_tri.tRender[0].clone(inside_tex[0]);
+
+				// but the two new points are at the locations where the 
+				// original sides of the triangle (lines) intersect with the plane
+				in_tri.pointsRender[1] = Vector.IntersectPlane(plane_p, plane_n, inside_points[0], outside_points[0], t);
+				in_tri.tRender[1].u = t.refValue * (outside_tex[0].u - inside_tex[0].u) + inside_tex[0].u;
+				in_tri.tRender[1].v = t.refValue * (outside_tex[0].v - inside_tex[0].v) + inside_tex[0].v;
+				in_tri.tRender[1].w = t.refValue * (outside_tex[0].w - inside_tex[0].w) + inside_tex[0].w;
+
+				in_tri.pointsRender[2] = Vector.IntersectPlane(plane_p, plane_n, inside_points[0], outside_points[1], t);
+				in_tri.tRender[2].u = t.refValue * (outside_tex[1].u - inside_tex[0].u) + inside_tex[0].u;
+				in_tri.tRender[2].v = t.refValue * (outside_tex[1].v - inside_tex[0].v) + inside_tex[0].v;
+				in_tri.tRender[2].w = t.refValue * (outside_tex[1].w - inside_tex[0].w) + inside_tex[0].w;
+
+				//in_tri.color = "green";
+				return null; // Return the newly formed single triangle
+			}
+
+			if (nInsidePointCount == 2 && nOutsidePointCount == 1)
+			{
+				// Triangle should be clipped. As two points lie inside the plane,
+				// the clipped triangle becomes a "quad". Fortunately, we can
+				// represent a quad with two new triangles
+
+				// Copy appearance info to new triangles
+				/*
+				out_tri1 = new Triangle();
+				out_tri1.clone(in_tri); 
+				*/
+				
+				result = new Triangle();
+				result.clone(in_tri); 
+				result.setNormalVisible(false);
+				
+				// The first triangle consists of the two inside points and a new
+				// point determined by the location where one side of the triangle
+				// intersects with the plane
+				in_tri.pointsRender[0].clone(inside_points[0]);
+				in_tri.pointsRender[1].clone(inside_points[1]);
+				in_tri.tRender[0].clone(inside_tex[0]);
+				in_tri.tRender[1].clone(inside_tex[1]);
+
+				in_tri.pointsRender[2] = Vector.IntersectPlane(plane_p, plane_n, inside_points[0], outside_points[0], t);
+				//in_tri.color = "cyan";
+				in_tri.tRender[2].u = t.refValue * (outside_tex[0].u - inside_tex[0].u) + inside_tex[0].u;
+				in_tri.tRender[2].v = t.refValue * (outside_tex[0].v - inside_tex[0].v) + inside_tex[0].v;
+				in_tri.tRender[2].w = t.refValue * (outside_tex[0].w - inside_tex[0].w) + inside_tex[0].w;
+
+				// The second triangle is composed of one of he inside points, a
+				// new point determined by the intersection of the other side of the 
+				// triangle and the plane, and the newly created point above
+				result.pointsRender[0].clone(inside_points[1]);
+				result.tRender[0].clone(inside_tex[1]);
+
+				result.pointsRender[1].clone(in_tri.pointsRender[2]);
+				result.tRender[1].clone(in_tri.tRender[2]);
+
+				result.pointsRender[2] = Vector.IntersectPlane(plane_p, plane_n, inside_points[1], outside_points[0], t);
+				//result.color = "magenta";
+				result.tRender[2].u = t.refValue * (outside_tex[0].u - inside_tex[1].u) + inside_tex[1].u;
+				result.tRender[2].v = t.refValue * (outside_tex[0].v - inside_tex[1].v) + inside_tex[1].v;
+				result.tRender[2].w = t.refValue * (outside_tex[0].w - inside_tex[1].w) + inside_tex[1].w;
+
+				return result; // Return two newly formed triangles which form a quad
+			}
+		}
+
+		Vector.prototype.length = function() 
+		{
+			return Math.sqrt(this.dotProduct(this));
+		}
+
+		Vector.prototype.normalize = function() 
+		{
+				var l = this.length();
+
+			if (l !== 0)
+			{
+				this.x = this.x / l;
+				this.y = this.y / l;
+				this.z = this.z / l;
+			}
+		}
+
+		Vector.prototype.sub = function(_vector) 
+		{
+			this.x -= _vector.x;
+			this.y -= _vector.y;
+			this.z -= _vector.z;
+		}
+
+		Vector.prototype.add = function(_vector) 
+		{
+			this.x += _vector.x;
+			this.y += _vector.y;
+			this.z += _vector.z;
+		}
+
+		Vector.prototype.mul = function(_k) 
+		{
+			this.x *= _k;
+			this.y *= _k;
+			this.z *= _k;
+		}
+
+		Vector.prototype.div = function(_k) 
+		{
+			this.x /= _k;
+			this.y /= _k;
+			this.z /= _k;
+		}
+
+		/* -------------------------------------------------------------------- */
+		function Triangle() 
+		{
+			this.t = new Array();
+			this.tRender = new Array();
+			this.p = new Array();
+			this.pointsRender = new Array();
+			this.faceColor = "";
+			this.color = "";
+			this.zAverage = 0;
+			this.normalVector = new Vector(0,0,0);
+		
+			this.normalRenderVectorO = new Vector(0,0,0);
+			this.normalRenderVectorT = new Vector(0,0,0);
+		
+			this.showNormal = true;
+
+			this.set(new Vector(0, 0, 0), new Vector(0, 0, 0), new Vector(0, 0, 0));
+			this.setTexture(new Vector2D(0, 0, 0), new Vector2D(0, 0, 0), new Vector2D(0, 0, 0));
+
+			this.imgDataTexture = null;
+			this.useTexture = false;
+		}
+
+		Triangle.prototype.clone = function(tri) 
+		{
+			// Clone texture information
+			this.t[0].u = tri.t[0].u;
+			this.t[0].v = tri.t[0].v;
+			this.t[0].w = tri.t[0].w;
+
+			this.t[1].u = tri.t[1].u;
+			this.t[1].v = tri.t[1].v;
+			this.t[1].w = tri.t[1].w;
+
+			this.t[2].u = tri.t[2].u;
+			this.t[2].v = tri.t[2].v;
+			this.t[2].w = tri.t[2].w;
+
+			this.tRender[0].u = tri.tRender[0].u;
+			this.tRender[0].v = tri.tRender[0].v;
+			this.tRender[0].w = tri.tRender[0].w;
+
+			this.tRender[1].u = tri.tRender[1].u;
+			this.tRender[1].v = tri.tRender[1].v;
+			this.tRender[1].w = tri.tRender[1].w;
+
+			this.tRender[2].u = tri.tRender[2].u;
+			this.tRender[2].v = tri.tRender[2].v;
+			this.tRender[2].w = tri.tRender[2].w;
+
+			// Clone points information
+			this.p[0].x = tri.p[0].x;
+			this.p[0].y = tri.p[0].y;
+			this.p[0].z = tri.p[0].z;
+			this.p[0].w = tri.p[0].w;
+
+			this.p[1].x = tri.p[1].x;
+			this.p[1].y = tri.p[1].y;
+			this.p[1].z = tri.p[1].z;
+			this.p[1].w = tri.p[1].w;
+	
+			this.p[2].x = tri.p[2].x;
+			this.p[2].y = tri.p[2].y;
+			this.p[2].z = tri.p[2].z;
+			this.p[2].w = tri.p[2].w;
+
+			this.pointsRender[0].x = tri.pointsRender[0].x;
+			this.pointsRender[0].y = tri.pointsRender[0].y;
+			this.pointsRender[0].z = tri.pointsRender[0].z;
+			this.pointsRender[0].w = tri.pointsRender[0].w;
+
+			this.pointsRender[1].x = tri.pointsRender[1].x;
+			this.pointsRender[1].y = tri.pointsRender[1].y;
+			this.pointsRender[1].z = tri.pointsRender[1].z;
+			this.pointsRender[1].w = tri.pointsRender[1].w;
+	
+			this.pointsRender[2].x = tri.pointsRender[2].x;
+			this.pointsRender[2].y = tri.pointsRender[2].y;
+			this.pointsRender[2].z = tri.pointsRender[2].z;
+			this.pointsRender[2].w = tri.pointsRender[2].w;
+
+			// Miscelaneous data
+			this.faceColor = tri.faceColor;
+			this.color = tri.color;
+			this.zAverage = tri.zAverage;
+
+			// Clone normal data
+			this.normalVector.x = tri.normalVector.x;
+			this.normalVector.y = tri.normalVector.y;
+			this.normalVector.z = tri.normalVector.z;
+			this.normalVector.w = tri.normalVector.w;
+
+			this.normalRenderVectorO.x = tri.normalRenderVectorO.x;
+			this.normalRenderVectorO.y = tri.normalRenderVectorO.y;
+			this.normalRenderVectorO.z = tri.normalRenderVectorO.z;
+			this.normalRenderVectorO.w = tri.normalRenderVectorO.w;
+
+			this.normalRenderVectorT.x = tri.normalRenderVectorT.x;
+			this.normalRenderVectorT.y = tri.normalRenderVectorT.y;
+			this.normalRenderVectorT.z = tri.normalRenderVectorT.z;
+			this.normalRenderVectorT.w = tri.normalRenderVectorT.w;
+	
+			this.showNormal = tri.showNormal;
+			this.imgDataTexture = tri.imgDataTexture;
+			this.useTexture = tri.useTexture;
+		}
+
+		Triangle.prototype.clear = function() 
+		{
+			this.p[0].x = 0;	this.p[0].y = 0;	this.p[0].z = 0;		this.p[0].w = 0;
+			this.p[1].x = 0;	this.p[1].y = 0;	this.p[1].z = 0;		this.p[1].w = 0;
+			this.p[2].x = 0;	this.p[2].y = 0;	this.p[2].z = 0;		this.p[2].w = 0;
+		}
+		
+		Triangle.prototype.set = function(p1, p2, p3) 
+		{
+			this.p[0] = p1;
+			this.p[1] = p2;
+			this.p[2] = p3;
+
+			this.pointsRender[0] = new Vector(p1.x, p1.y, p1.z);
+			this.pointsRender[1] = new Vector(p2.x, p2.y, p2.z);
+			this.pointsRender[2] = new Vector(p3.x, p3.y, p3.z);
+		}
+
+		Triangle.prototype.setTexture = function(t1, t2, t3) 
+		{
+			this.t[0] = t1;
+			this.t[1] = t2;
+			this.t[2] = t3;
+
+			this.tRender[0] = new Vector2D(t1.u, t1.v, t1.w);
+			this.tRender[1] = new Vector2D(t2.u, t2.v, t2.w);
+			this.tRender[2] = new Vector2D(t3.u, t3.v, t3.w);
+		}
+
+		Triangle.prototype.applyMatrix = function(result, matrix) 
+		{
+			result.clear();
+			
+			multiplyMatrixVector(this.p[0], result.p[0], matrix);
+			multiplyMatrixVector(this.p[1], result.p[1], matrix);
+			multiplyMatrixVector(this.p[2], result.p[2], matrix);
+		
+			return result;
+		}
+
+		Triangle.prototype.applyMatrixFromRenderPoints = function(matrix) 
+		{
+			multiplyMatrixVectorOver(this.pointsRender[0], matrix);
+			multiplyMatrixVectorOver(this.pointsRender[1], matrix);
+			multiplyMatrixVectorOver(this.pointsRender[2], matrix);
+		}
+
+		Triangle.prototype.calculateAndUpdateNormalVector = function() 
+		{
+			var normal = new Vector();
+			var line1 = new Vector();
+			var line2 = new Vector();
+
+			line1.x = this.p[1].x - this.p[0].x;
+			line1.y = this.p[1].y - this.p[0].y;
+			line1.z = this.p[1].z - this.p[0].z;
+
+			line2.x = this.p[2].x - this.p[0].x;
+			line2.y = this.p[2].y - this.p[0].y;
+			line2.z = this.p[2].z - this.p[0].z;
+
+			this.normalVector = line1.crossProduct(line2);
+			this.normalVector.normalize();
+
+			return this.normalVector;
+		}
+
+		Triangle.prototype.calculateAndUpdateNormalVectorFromRenderPoints = function() 
+		{
+			var normal = new Vector();
+			var line1 = new Vector();
+			var line2 = new Vector();
+
+			line1.x = this.pointsRender[1].x - this.pointsRender[0].x;
+			line1.y = this.pointsRender[1].y - this.pointsRender[0].y;
+			line1.z = this.pointsRender[1].z - this.pointsRender[0].z;
+
+			line2.x = this.pointsRender[2].x - this.pointsRender[0].x;
+			line2.y = this.pointsRender[2].y - this.pointsRender[0].y;
+			line2.z = this.pointsRender[2].z - this.pointsRender[0].z;
+
+			this.normalVector = line1.crossProduct(line2);
+			this.normalVector.normalize();
+
+			return this.normalVector;
+		}
+
+		Triangle.prototype.isABackfacedTriangle = function(_normal, _vector) 
+		{
+			var dp = _normal.dotProduct(_vector);
+
+			//console.log("dp:", dp, " camera:", _vector, " normal:",_normal);
+
+			return (dp < 0);
+		}
+
+		Triangle.prototype.setNormalVisible = function(_value) 
+		{
+			this.showNormal = _value;
+		}
+
+		Triangle.prototype.getNormalVisible = function() 
+		{
+			return this.showNormal;
+		}
+
+		function Mesh() 
+		{
+			this.tris = new Array();
+			this.VectorMin = new Vector(0, 0, 0);
+			this.VectorMax = new Vector(0, 0, 0);			
+			this.VectorCenter = new Vector(0, 0, 0);
+			this.meshData = "";
+			this.fileName = "";
+			this.renderTris = new Array();
+
+			this.position = new Vector(0, 0, 0);
+			this.rotation = new Vector(0, 0, 0);
+			this.scale = new Vector(1, 1, 1);
+			this.worldMatrix = Space.createMatrixIdentity();
+
+			this.color = {r: 0, g: 0, b: 0, a: 1};
+		
+			this.imgTexture = new Image();
+			this.imgDataTexture = null;
+		}
+
+		Mesh.prototype.createMeshFromData = function(_callback, _center) 
+		{
+            var allText = _callback();
+            this.meshData = allText; 
+		    this.generateMeshFromFileData(allText);
+			
+		    if (_center === true)
+		    {
+				this.updateCenter();
+				this.center();
+			}
+		}
+
+		Mesh.prototype.loadMeshFromFile = function(_fileName, _callback, _center) 
+		{
+			var thisClass = this;
+			this.fileName = _fileName;
+
+		    var rawFile = new XMLHttpRequest();
+		    rawFile.open("GET", _fileName, false);
+		    rawFile.onreadystatechange = function ()
+		    {
+		    	var loadedOk = false;
+		    	var allText = "";
+
+		        if(rawFile.readyState === 4)
+		        {
+		            if(rawFile.status === 200 || rawFile.status == 0)
+		            {
+		                allText = rawFile.responseText;
+		                //console.log(allText);
+		                thisClass.meshData = allText; 
+		                thisClass.generateMeshFromFileData(allText);
+		                loadedOk = true;
+		            }
+		        }
+
+				_callback(thisClass, loadedOk, _center);		        
+		    }
+		    rawFile.send(null);
+		}
+		
+		Mesh.prototype.generateMeshFromFileData = function(_meshData) 
+		{
+			var cacheColorVertexes = new Array();
+			var cacheVertexes = new Array();
+			var cacheVertexTextures = new Array();
+			var splitted = _meshData.split("\n");
+
+			for (var i = 0; i < splitted.length - 1; i++) 
+			{
+			   	if (splitted[i].substring(0,2) == "v ")
+			   	{
+			   		var splittedRow = splitted[i].split(" ");
+			   		
+			   		var vector = new Vector(
+				   			parseFloat(splittedRow[1]), 
+				   			parseFloat(splittedRow[2]), 
+				   			parseFloat(splittedRow[3]), 
+				   			1);
+
+			   		cacheVertexes.push(vector);
+
+			   		var vertexColor = new Vector(0, 0, 0, 0);
+			   		if (splittedRow.length > 4)
+			   		{
+			   			vertexColor.colored = true;
+			   			vertexColor.x = parseFloat(splittedRow[4]);
+			   			vertexColor.y = parseFloat(splittedRow[5]);
+			   			vertexColor.z = parseFloat(splittedRow[6]);
+				   	}
+			   		cacheColorVertexes.push(vertexColor);
+			   	}
+
+			   	if (splitted[i].substring(0,3) == "vt ")
+			   	{
+			   		var splittedRow = splitted[i].split(" ");
+			   		var vector = new Vector(
+			   			parseFloat(splittedRow[1]), 
+			   			parseFloat(splittedRow[2]), 
+			   			0, 
+			   			0);
+			   		cacheVertexTextures.push(vector);
+			   	}
+
+			   	if (splitted[i].substring(0,2) == "f ")
+			   	{
+			   		var splittedFace = splitted[i].split(" ");
+			   		var v = 0;
+			   		var vt = 0;
+
+			   		if (splittedFace[1].split("/").length > 1)
+			   		{
+				   		v1 = splittedFace[1].split("/")[0];
+				   		vt1 = splittedFace[1].split("/")[1];
+				   		v2 = splittedFace[2].split("/")[0];
+				   		vt2 = splittedFace[2].split("/")[1];
+				   		v3 = splittedFace[3].split("/")[0];
+				   		vt3 = splittedFace[3].split("/")[1];
+
+				   		var tri = this.createNewTriangleWithPoints(cacheVertexes[parseFloat(v1) - 1],  
+				   												   cacheVertexes[parseFloat(v2) - 1], 
+				   												   cacheVertexes[parseFloat(v3) - 1]);
+
+				   		tri.setTexture( new Vector2D(	cacheVertexTextures[parseFloat(vt1) - 1].x, 
+				   										cacheVertexTextures[parseFloat(vt1) - 1].y, 
+														1),
+
+				   						new Vector2D(	cacheVertexTextures[parseFloat(vt2) - 1].x, 
+				   										cacheVertexTextures[parseFloat(vt2) - 1].y, 
+														1),
+
+				   						new Vector2D(	cacheVertexTextures[parseFloat(vt3) - 1].x, 
+				   										cacheVertexTextures[parseFloat(vt3) - 1].y,
+														1));
+				   		tri.useTexture = true;
+			   		}
+			   		else
+			   		{
+				   		var tri = this.createNewTriangleWithPoints(cacheVertexes[parseFloat(splittedFace[1]) - 1],  
+				   												   cacheVertexes[parseFloat(splittedFace[2]) - 1], 
+				   												   cacheVertexes[parseFloat(splittedFace[3]) - 1]);
+
+				   		var vertexColor = cacheColorVertexes[parseFloat(splittedFace[1]) - 1];
+				   		if (vertexColor !== null && vertexColor.colored === true)
+				   		{
+				   			tri.faceColor = demo.rgbaToColor(vertexColor.x, vertexColor.y, vertexColor.z, 1); 
+				   		}
+			   		}
+
+			   		this.addTriangle(tri);
+			   	}
+			}   
+
+			console.log("generateMeshFromFileData ",this.fileName, ", triangles count:", this.tris.length);			
+		}
+
+		Mesh.prototype.addTriangle = function(triangle) 
+		{
+			this.tris.push(triangle);
+		}
+
+		Mesh.prototype.createNewTriangleWithPointsValues = function(x1, y1, z1, x2, y2, z2, x3, y3, z3) 
+		{
+			var v1 = new Vector(x1, y1, z1);
+			var v2 = new Vector(x2, y2, z2);
+			var v3 = new Vector(x3, y3, z3);
+
+			var tri = new Triangle();
+			tri.set(v1, v2, v3);
+
+			return tri;
+		}
+
+		Mesh.prototype.createNewTriangleWithPoints = function(_v1, _v2, _v3) 
+		{
+			return this.createNewTriangleWithPointsValues(_v1.x, _v1.y, _v1.z, _v2.x, _v2.y, _v2.z, _v3.x, _v3.y, _v3.z);
+		}
+
+		Mesh.prototype.updateCenter = function()
+		{
+			var tri = null;
+
+			for (var i = 0; i < this.tris.length; i++) 
+			{
+				tri = this.tris[i];
+
+				if (i === 0)
+				{
+					this.VectorMin.x = tri.p[0].x;
+					this.VectorMin.y = tri.p[0].y;
+					this.VectorMin.z = tri.p[0].z;
+					this.VectorMax.x = tri.p[0].x;
+					this.VectorMax.y = tri.p[0].y;
+					this.VectorMax.z = tri.p[0].z;
+				}
+
+				for (var ip = 0; ip < 3; ip++) 
+				{
+					if (tri.p[ip].x <= this.VectorMin.x) this.VectorMin.x = tri.p[ip].x;
+					if (tri.p[ip].y <= this.VectorMin.y) this.VectorMin.y = tri.p[ip].y;
+					if (tri.p[ip].z <= this.VectorMin.z) this.VectorMin.z = tri.p[ip].z;
+
+					if (tri.p[ip].x >= this.VectorMax.x) this.VectorMax.x = tri.p[ip].x;
+					if (tri.p[ip].y >= this.VectorMax.y) this.VectorMax.y = tri.p[ip].y;
+					if (tri.p[ip].z >= this.VectorMax.z) this.VectorMax.z = tri.p[ip].z;
+				}
+			}			
+
+			this.VectorCenter.x = (this.VectorMin.x * -1) - ((this.VectorMax.x - this.VectorMin.x) / 2);
+			this.VectorCenter.y = (this.VectorMin.y * -1) - ((this.VectorMax.y - this.VectorMin.y) / 2);
+			this.VectorCenter.z = (this.VectorMin.z * -1) - ((this.VectorMax.z - this.VectorMin.z) / 2);
+		}		
+
+		Mesh.prototype.move = function(_x, _y, _z)
+		{
+			var tri = null;
+
+			for (var i = 0; i < this.tris.length; i++) 
+			{
+				tri = this.tris[i];
+
+				for (var ip = 0; ip < 3; ip++) 
+				{
+					tri.p[ip].x += _x;
+					tri.p[ip].y += _y;
+					tri.p[ip].z += _z;
+				}
+			}			
+		}		
+
+		Mesh.prototype.center = function()
+		{
+			var tri = null;
+
+			for (var i = 0; i < this.tris.length; i++) 
+			{
+				tri = this.tris[i];
+
+				for (var ip = 0; ip < 3; ip++) 
+				{
+					tri.p[ip].x += this.VectorCenter.x;
+					tri.p[ip].y += this.VectorCenter.y;
+					tri.p[ip].z += this.VectorCenter.z;
+				}
+			}			
+		}		
+
+		Mesh.prototype.addMeshAt = function(_mesh, _x, _y, _z)
+		{
+			var tri = null;
+
+			for (var i = 0; i < _mesh.tris.length; i++) 
+			{
+				tri = new Triangle();
+				tri.p[0].clone(_mesh.tris[i].p[0]);
+				tri.p[1].clone(_mesh.tris[i].p[1]);
+				tri.p[2].clone(_mesh.tris[i].p[2]);
+
+				for (var ip = 0; ip < 3; ip++) 
+				{
+					tri.p[ip].x += _x * 1.5;
+					tri.p[ip].y += _y * 1.5;
+					tri.p[ip].z += _z * 1.5;
+				}
+
+				this.createNewTriangleWithPoints(tri.p[0], tri.p[1], tri.p[2]);
+			}			
+		}		
+
+		Mesh.prototype.setPosition = function(_x, _y, _z) 
+		{
+			this.position.x = _x;
+			this.position.y = _y;
+			this.position.z = _z;
+		}
+
+		Mesh.prototype.getPosition = function() 
+		{
+			return this.position;
+		}
+
+		Mesh.prototype.setAngleX = function(_value) 
+		{
+			this.rotation.x = _value;
+		}
+
+		Mesh.prototype.setAngleY = function(_value) 
+		{
+			this.rotation.y = _value;
+		}
+
+		Mesh.prototype.setAngleZ = function(_value) 
+		{
+			this.rotation.z = _value;
+		}
+
+		Mesh.prototype.addAngleX = function(_value) 
+		{
+			this.rotation.x += _value;
+		}
+
+		Mesh.prototype.addAngleY = function(_value) 
+		{
+			this.rotation.y += _value;
+		}
+
+		Mesh.prototype.addAngleZ = function(_value) 
+		{
+			this.rotation.z += _value;
+		}
+
+		Mesh.prototype.getRotation = function() 
+		{
+			return this.rotation;
+		}
+
+		Mesh.prototype.setScale = function(_x, _y, _z) 
+		{
+			this.setScaleX(_x);
+			this.setScaleY(_y);
+			this.setScaleZ(_z);
+		}
+
+		Mesh.prototype.setScaleX = function(_value) 
+		{
+			this.scale.x = _value;
+		}
+
+		Mesh.prototype.setScaleY = function(_value) 
+		{
+			this.scale.y = _value;
+		}
+
+		Mesh.prototype.setScaleZ = function(_value) 
+		{
+			this.scale.z = _value;
+		}
+
+		Mesh.prototype.getScale = function() 
+		{
+			return this.scale;
+		}
+
+		Mesh.prototype.setColor = function(_r, _g, _b, _a) 
+		{
+			this.color.r = _r;
+			this.color.g = _g;
+			this.color.b = _b;
+			this.color.a = _a;
+		}
+
+		Mesh.prototype.getColor = function() 
+		{
+			return this.color;
+		}
+
+		Mesh.prototype.loadTexture = function(_url) 
+		{
+			var _this = this;
+			this.imgTexture.onload = function () 
+			{
+				if (_this.imgTexture != null)
+				{
+					//var srcNameSplit = _this.imgTexture.src.split("/");
+					//var imageName = (srcNameSplit[srcNameSplit.length - 1]).split(".")[0];
+					var imgWidth = _this.imgTexture.width;
+					var imgHeight = _this.imgTexture.height;
+					var canvasName = "imageTexture_" + Date.now();
+
+					var newCanvas = document.createElement('canvas');
+					newCanvas.width = imgWidth;
+					newCanvas.height = imgHeight;
+					newCanvas.id = canvasName;
+
+					var newContext = newCanvas.getContext('2d'); 
+					newContext.clearRect(0, 0, imgWidth, imgHeight);
+					newContext.drawImage(_this.imgTexture, 0, 0);
+
+					_this.imgDataTexture = newContext.getImageData(0, 0,imgWidth, imgHeight);
+				}
+			}			
+			this.imgTexture.crossOrigin = "Anonymous";
+			this.imgTexture.src = _url;
+
+		}
+
+		Mesh.prototype.isTextureLoaded = function() 
+		{
+			return this.imgDataTexture !== null;
+		}
+
+		/* -------------------------------------------------------------------- */
+
+		function multiplyMatrixVector(inVector, outVector, matrix) 
+		{
+			outVector.x = inVector.x * matrix[0][0] + inVector.y * matrix[1][0] + inVector.z * matrix[2][0] + matrix[3][0];
+			outVector.y = inVector.x * matrix[0][1] + inVector.y * matrix[1][1] + inVector.z * matrix[2][1] + matrix[3][1];
+			outVector.z = inVector.x * matrix[0][2] + inVector.y * matrix[1][2] + inVector.z * matrix[2][2] + matrix[3][2];
+			outVector.w = inVector.x * matrix[0][3] + inVector.y * matrix[1][3] + inVector.z * matrix[2][3] + matrix[3][3];
+		}
+
+		function multiplyMatrixVectorOver(inVector, matrix) 
+		{
+			var x, y, z, w;
+
+			x = inVector.x * matrix[0][0] + inVector.y * matrix[1][0] + inVector.z * matrix[2][0] + matrix[3][0];
+			y = inVector.x * matrix[0][1] + inVector.y * matrix[1][1] + inVector.z * matrix[2][1] + matrix[3][1];
+			z = inVector.x * matrix[0][2] + inVector.y * matrix[1][2] + inVector.z * matrix[2][2] + matrix[3][2];
+			w = inVector.x * matrix[0][3] + inVector.y * matrix[1][3] + inVector.z * matrix[2][3] + matrix[3][3];
+
+			inVector.x = x;
+			inVector.y = y;
+			inVector.z = z;
+			inVector.w = w;
+
+		}
+
+		/* -------------------------------------------------------------------- */
+		var demo = null; 
+		function load() 
+		{
+			console.log(C_VERSION_TITLE);
+			document.title = C_VERSION_TITLE;
+			demo = new JSGameEngine(document.getElementById("cv")); 
+			demo.start();
+		}
+
+		/* -------------------------------------------------------------------- */
+		var space = new Space();
+		var boardW = 16;
+		var boardH = 16;
+		var boardSizeW = 50;
+		var boardSizeH = 50;
+		var faseAngle = 0;
+		var peakHeight = (boardSizeW + boardSizeH) / 16;
+		var faseFrec = 15;
+
+		function onUserCreate() 
+		{
+			console.log("User create");
+
+			demo.showTimes(false);
+
+			space.setNormalsVisible(false);
+			space.setLinesVisible(true);
+			space.setLight(0, 100, 0);
+
+			space.setCamera(0, 25, -53);
+
+			makeScene();
+		}
+
+
+		var once = false;
+		function onUserUpdate() 
+		{
+			demo.clearScreen();
+			
+			console.log("User update");			
+
+			processInputs();
+
+			if (once == false)
+			{
+				// Scene setup
+				demo.clearScreen();
+				
+				demo.startTime("performAnimation");
+				performAnimation(space.getMeshCollection()[0], boardSizeW, boardSizeH, boardW * 2, boardH * 2 )
+				demo.showTimeDiff("performAnimation");
+
+				space.update();
+
+				var rotation = space.getMeshCollection()[0].getRotation();
+				space.renderLookAt(space.getCamera(), space.getLookAtVector(), rotation.x, rotation.y, rotation.z);
+			}
+		}
+
+		function processInputs()
+		{
+			if (demo.isKeyPressed(C_KEY_CHAR_H) === true && demo.getKeyWaitingRelease(C_KEY_CHAR_H) === false)
+			{
+				demo.toggleInfo();
+				demo.satKeyWaitRelease(C_KEY_CHAR_H);
+			}
+
+			// Rotate planes
+			if (demo.isKeyPressed(C_KEY_CHAR_Q) === true)
+				space.getMeshCollection()[0].addAngleX(demo.graToRad(5));
+	
+			if (demo.isKeyPressed(C_KEY_CHAR_A) === true)
+				space.getMeshCollection()[0].addAngleX(demo.graToRad(5) * -1);
+
+			if (demo.isKeyPressed(C_KEY_CHAR_W) === true)
+				space.getMeshCollection()[0].addAngleY(demo.graToRad(5));
+
+			if (demo.isKeyPressed(C_KEY_CHAR_S) === true)
+				space.getMeshCollection()[0].addAngleY(demo.graToRad(5) * -1);
+
+			if (demo.isKeyPressed(C_KEY_CHAR_E) === true)
+				space.getMeshCollection()[0].addAngleZ(demo.graToRad(5));
+
+			if (demo.isKeyPressed(C_KEY_CHAR_D) === true)
+				space.getMeshCollection()[0].addAngleZ(demo.graToRad(5) * -1);
+
+			if (demo.isKeyPressed(C_KEY_CHAR_N) === true && demo.getKeyWaitingRelease(C_KEY_CHAR_N) === false)
+			{
+				space.setNormalsVisible(!space.getNormalsVisible());
+				demo.satKeyWaitRelease(C_KEY_CHAR_N);
+			}
+
+			if (demo.isKeyPressed(C_KEY_CHAR_L) === true && demo.getKeyWaitingRelease(C_KEY_CHAR_L) === false)
+			{
+				space.setLinesVisible(!space.getLinesVisible());
+				demo.satKeyWaitRelease(C_KEY_CHAR_L);
+			}
+
+			if (demo.isKeyPressed(C_KEY_CHAR_R) === true && demo.getKeyWaitingRelease(C_KEY_CHAR_R) === false)
+			{
+				space.setWireframeMode(!space.getWireframeMode());
+				demo.satKeyWaitRelease(C_KEY_CHAR_R);
+			}
+
+			if (demo.isKeyPressed(C_KEY_CTRL) === true)
+			{
+				if (demo.isKeyPressed(C_KEY_UP) === true)
+					space.getCamera().y += 2; 	// Travel Upwards
+
+				if (demo.isKeyPressed(C_KEY_DOWN) === true)
+					space.getCamera().y -= 2; 	// Travel Downwards
+			}
+			else
+			{
+				// Rotate camera target.
+				if (demo.isKeyPressed(C_KEY_LEFT) === true)
+					space.cameraYaw += demo.graToRad(5);
+
+				if (demo.isKeyPressed(C_KEY_RIGHT) === true)
+					space.cameraYaw -= demo.graToRad(5);
+			
+				// Move camera
+				var vForward = Vector.Mul(space.getLookAtVector(), 0.5); 
+
+				if (demo.isKeyPressed(C_KEY_UP) === true)
+					space.getCamera().add(vForward);
+
+				if (demo.isKeyPressed(C_KEY_DOWN) === true)
+					space.getCamera().sub(vForward);
+			}
+		}
+
+		function makeScene()
+		{
+			space.clearMeshCollection();
+
+			var floorMesh = new Mesh();
+			var cols = boardW * 2 + 1;
+			var rows = boardH * 2 + 1;
+
+			planeBufferGeometry(floorMesh, boardSizeW, boardSizeH, rows - 1, cols - 1);
+			floorMesh.setPosition(0, 0, 0);
+			floorMesh.setColor(0, 100, 0, 1);
+			space.getMeshCollection().push(floorMesh);
+		}
+
+		function planeBufferGeometry( mesh, width, height, widthSegments, heightSegments ) 
+		{
+			var width = width || 1;
+			var height = height || 1;
+			var width_half = width / 2;
+			var height_half = height / 2;
+
+			var gridX = Math.floor( widthSegments ) || 1;
+			var gridY = Math.floor( heightSegments ) || 1;
+
+			var gridX1 = gridX + 1;
+			var gridY1 = gridY + 1;
+
+			var segment_width = width / gridX;
+			var segment_height = height / gridY;
+
+			var ix, iy;
+
+			// buffers
+			var indices = [];
+			var vertices = [];
+			var normals = [];
+			var uvs = [];
+
+			// generate vertices, normals and uvs
+
+			for ( iy = 0; iy < gridY1; iy ++ ) {
+
+				var y = iy * segment_height - height_half;
+
+				for ( ix = 0; ix < gridX1; ix ++ ) {
+
+					var x = ix * segment_width - width_half;
+					vertices.push( x, 0, y );
+
+					normals.push( 0, 0, 1 );
+
+					uvs.push( ix / gridX );
+					uvs.push( 1 - ( iy / gridY ) );
+
+				}
+
+			}
+
+			// indices
+			for ( iy = 0; iy < gridY; iy ++ ) {
+
+				for ( ix = 0; ix < gridX; ix ++ ) {
+
+					var a = ix + gridX1 * iy;
+					var b = ix + gridX1 * ( iy + 1 );
+					var c = ( ix + 1 ) + gridX1 * ( iy + 1 );
+					var d = ( ix + 1 ) + gridX1 * iy;
+
+					// faces
+
+					indices.push( a, b, d );
+					indices.push( b, c, d );
+				}
+			}
+
+	   		var p1 = null;
+	   		var p2 = null;
+	   		var p3 = null;
+			var tri = null; 
+
+			for (var i = 0; i < indices.length - 1; i+=3) 
+			{
+		   		p1 = new Vector(vertices[indices[i + 0] * 3], vertices[indices[i + 0] * 3 + 1], vertices[indices[i + 0] * 3 + 2]);
+		   		p2 = new Vector(vertices[indices[i + 1] * 3], vertices[indices[i + 1] * 3 + 1], vertices[indices[i + 1] * 3 + 2]);
+		   		p3 = new Vector(vertices[indices[i + 2] * 3], vertices[indices[i + 2] * 3 + 1], vertices[indices[i + 2] * 3 + 2]);
+
+				tri = mesh.createNewTriangleWithPoints(p1, p2, p3);  
+	   			//tri.faceColor = demo.rgbaToColor(0, 200, 0, 1); 
+				mesh.addTriangle(tri);
+			}
+			console.log(gridY1, gridX1, "vertex=" + vertices.length / 3, " tris=" + mesh.tris.length, " faces=" + indices.length);
+
+		}
+
+		function performAnimation(mesh, width, height, widthSegments, heightSegments)
+		{
+			faseAngle += 5;
+
+			var ix, iy;
+			var index;
+
+			var segment_width = width / widthSegments;
+			var segment_height = height / heightSegments;
+
+			for ( iy = 0; iy < heightSegments; iy ++ ) 
+			{
+				var logRow = "";
+				for ( ix = 0; ix < widthSegments; ix ++ )
+				{
+					var index = (ix + iy * widthSegments) * 2;
+					logRow += applyZFunctionToTriangle(mesh.tris[index + 0], segment_width, segment_height, widthSegments, heightSegments);		
+					logRow += applyZFunctionToTriangle(mesh.tris[index + 1], segment_width, segment_height, widthSegments, heightSegments);
+				}
+
+				//console.log(logRow);
+			}
+		}
+		
+		function applyZFunctionToTriangle(triItem, segment_width, segment_height, widthSegments, heightSegments)
+		{
+			var log = "";
+			var indX, indY;
+
+			x = triItem.p[0].x;
+			y = triItem.p[0].z;
+			indX = (Math.floor( x / segment_width ) || 0) + (widthSegments / 2);
+			indY = (Math.floor( y / segment_height ) || 0) + (heightSegments / 2);
+			triItem.p[0].y = zFunction(x, y, faseFrec, faseAngle, peakHeight );
+			log += indX.toString() + "," + indY.toString() + "; ";
+
+			x = triItem.p[1].x;
+			y = triItem.p[1].z;
+			indX = (Math.floor( x / segment_width ) || 0) + (widthSegments / 2);
+			indY = (Math.floor( y / segment_height ) || 0) + (heightSegments / 2);
+			triItem.p[1].y = zFunction(x, y, faseFrec, faseAngle, peakHeight);
+			log += indX.toString()  + "," +  indY.toString() + "; ";
+
+			x = triItem.p[2].x;
+			y = triItem.p[2].z;
+			indX = (Math.floor( x / segment_width ) || 0) + (widthSegments / 2);
+			indY = (Math.floor( y / segment_height ) || 0) + (heightSegments / 2);
+			triItem.p[2].y = zFunction(x, y, faseFrec, faseAngle, peakHeight);
+			log += indX.toString()  + "," +  indY.toString() + " | ";
+
+			return log;
+		}
+
+		function zFunction(x, y, faseFrec, faseAngle, peakHeight)
+		{
+			var ro = Math.sqrt((x * x) + (y * y));
+			var tita = ro * faseFrec - (faseAngle + faseAngle);
+ 			var z = Math.sin(demo.graToRad( tita )) * peakHeight;
+
+			return z;
+		}
+	</script>
+	<style>
+	body {
+		background-color:black;
+		margin:10px;
+		text-align:center;
+	}
+	</style>
+</head>
+<body onload="load();">
+<div align="center">
+  <canvas id="cv" width="640" height="480"></canvas>
+</div> 
+</body>
+</html>|
