@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Version 2.0 -->
+		<title>three.js - geometry senoid</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+		<style>
+			body {
+				background-color: #f0f0f0;
+				color: #444;
+			}
+			a {
+				color: #08f;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div id="container"></div>
+		<div id="info">
+			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> geometry senoid<br/>
+			by <a href="https://mfontanadev.github.io/" target="_blank" rel="noopener">mfontanadev</a>
+		</div>
+
+		<script type="module">
+
+			import * as THREE from './build/three.module.js';
+
+			import Stats from './jsm/libs/stats.module.js';
+			import { GUI } from './jsm/libs/dat.gui.module.js';
+
+			import { DragControls } from './jsm/controls/DragControls.js';
+			import { OrbitControls } from './jsm/controls/OrbitControls.js';
+			import { TransformControls } from './jsm/controls/TransformControls.js';
+
+			var container, stats;
+			var scene, camera, renderer;
+			var geometry, group;
+			var mesh, lineSegments; 
+
+			// Params
+			var faseAngle = 0;
+
+			var data = {
+				radious: 32,
+				segments: 32,
+				frecuency: 1,
+				amplitude: 4
+			};
+
+			create();
+			update();
+
+			function create() 
+			{
+				container = document.getElementById( 'container' );
+
+				var gui = new GUI();
+				var folder = gui.addFolder( 'Senoid experiment' );
+
+				folder.add( data, 'radious', 16, 64 ).onChange( addSenoid );
+				folder.add( data, 'segments', 16, 64 ).step( 1 ).onChange( addSenoid );
+				folder.add( data, 'frecuency', 1, 8 ).step( 1 ).onChange( updateGeometry );
+				folder.add( data, 'amplitude', 1, 16 ).step( 1 ).onChange( updateGeometry );
+				folder.open();
+				
+				//
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0xf0f0f0 );
+
+				//
+				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 2000 );
+				camera.position.z = 80;
+				camera.position.y = 45;
+				camera.position.x = 0;
+	            camera.lookAt( 0, 0, 0 );
+
+
+				//
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				//
+				var orbit = new OrbitControls( camera, renderer.domElement );
+				orbit.enableZoom = false;
+
+				//
+				var lights = [];
+				lights[ 0 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+				lights[ 1 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+				lights[ 2 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+
+				lights[ 0 ].position.set( 0, 200, 0 );
+				lights[ 1 ].position.set( 100, 200, 100 );
+				lights[ 2 ].position.set( - 100, - 200, - 100 );
+
+				scene.add( lights[ 0 ] );
+				scene.add( lights[ 1 ] );
+				scene.add( lights[ 2 ] );
+
+				// 
+				addSenoid();
+
+				// Stats
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				//
+				window.addEventListener( 'resize', function () 
+				{
+					camera.aspect = window.innerWidth / window.innerHeight;
+					camera.updateProjectionMatrix();
+
+					renderer.setSize( window.innerWidth, window.innerHeight );
+				}, false );
+			}
+
+			function update()
+			{
+				requestAnimationFrame( update );
+
+				updateGeometry();
+
+				renderer.render( scene, camera );
+
+				stats.update();
+			}
+
+			function addSenoid()
+			{
+				if ( geometry !== undefined ) 
+					geometry.dispose();
+
+				if (group !== undefined )
+				{
+					if (mesh !== undefined )
+						group.remove( mesh );
+
+					if (lineSegments !== undefined )
+						group.remove( lineSegments );
+
+					scene.remove( group );
+				}
+
+				group = new THREE.Group();
+				geometry = new THREE.PlaneBufferGeometry(data.radious * 2, data.radious * 2, data.segments, data.segments);
+				var lineMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.5 } );
+				var meshMaterial = new THREE.MeshPhongMaterial( { color: 0x156289, emissive: 0x072534, side: THREE.DoubleSide, flatShading: true } );
+
+ 				mesh = new THREE.Mesh( geometry, meshMaterial );
+ 				lineSegments = new THREE.LineSegments( geometry, lineMaterial );
+
+				group.add( mesh );
+				group.add( lineSegments );
+				group.rotation.x += Math.PI / 180 * 90;
+
+				scene.add( group );
+			}
+
+			function updateGeometry()
+			{
+				faseAngle = ((faseAngle + 5) % 360);
+				
+				applyZFunction(geometry.attributes.position.array);
+
+				geometry.attributes.position.needsUpdate = true;
+			}
+
+			function applyZFunction(vertex)
+			{
+				var x, y;
+				for (var i = 0; i < vertex.length; i += 3 ) 
+				{
+					x = vertex[i + 0];
+					y = vertex[i + 1];
+
+					vertex[i + 2] = zFunction(x, y, data.frecuency, faseAngle, data.amplitude, data.radious);
+				}
+			}
+
+			function zFunction(x, y, frecuency, faseAngle, amplitude, radious)
+			{
+				var ro = Math.sqrt((x * x) + (y * y));
+				var angle =  360 * (ro / radious);
+
+				var tita = angle * frecuency - faseAngle;
+	 			var z = Math.sin(tita * Math.PI / 180) * amplitude;
+
+				return z;
+			}
+
+		</script>
+
+	</body>
+</html>
