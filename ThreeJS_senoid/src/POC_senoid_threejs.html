@@ -5,7 +5,13 @@
 		<title>three.js - geometry senoid</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<link type="text/css" rel="stylesheet" href="main.css">
+		<link type="text/css" rel="stylesheet" href="files/main.css">
+		
+		<script src="js/build/three.js"></script>
+		<script src="js/jsm/libs/stats.min.js"></script>
+		<script src="js/jsm/libs/dat.gui.min.js"></script>
+		<script src="js/jsm/controls/OrbitControls.js"></script>
+
 		<style>
 			body {
 				background-color: #f0f0f0;
@@ -15,26 +21,8 @@
 				color: #08f;
 			}
 		</style>
-	</head>
-	<body>
 
-		<div id="container"></div>
-		<div id="info">
-			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> geometry senoid<br/>
-			by <a href="https://mfontanadev.github.io/" target="_blank" rel="noopener">mfontanadev</a>
-		</div>
-
-		<script type="module">
-
-			import * as THREE from './build/three.module.js';
-
-			import Stats from './jsm/libs/stats.module.js';
-			import { GUI } from './jsm/libs/dat.gui.module.js';
-
-			import { DragControls } from './jsm/controls/DragControls.js';
-			import { OrbitControls } from './jsm/controls/OrbitControls.js';
-			import { TransformControls } from './jsm/controls/TransformControls.js';
-
+		<script type="text/javascript">
 			var container, stats;
 			var scene, camera, renderer;
 			var geometry, group;
@@ -50,14 +38,17 @@
 				amplitude: 4
 			};
 
-			create();
-			update();
+			function load() 
+			{
+				create();
+				update();
+			}
 
 			function create() 
 			{
 				container = document.getElementById( 'container' );
 
-				var gui = new GUI();
+				var gui = new dat.GUI();
 				var folder = gui.addFolder( 'Senoid experiment' );
 
 				folder.add( data, 'radious', 16, 64 ).onChange( addSenoid );
@@ -85,7 +76,7 @@
 				document.body.appendChild( renderer.domElement );
 
 				//
-				var orbit = new OrbitControls( camera, renderer.domElement );
+				var orbit = new THREE.OrbitControls( camera, renderer.domElement );
 				orbit.enableZoom = false;
 
 				//
@@ -192,8 +183,15 @@
 
 				return z;
 			}
-
 		</script>
 
+	</head>
+	<body onload="load();">
+
+		<div id="container"></div>
+		<div id="info">
+			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> geometry senoid<br/>
+			by <a href="https://mfontanadev.github.io/" target="_blank" rel="noopener">mfontanadev</a>
+		</div>
 	</body>
 </html>
