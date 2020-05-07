@@ -21,7 +21,7 @@ App that shows you senoid function in a 3D way but, really this another excuse t
 	</tr>
 	<tr>
 		<th align="center">
-			Original paper version
+			Original paper version (near 2003)
 		</th>
 		<th align="center">
 		    Digital version
