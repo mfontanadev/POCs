@@ -13,7 +13,7 @@ App that shows you senoid function in a 3D way but, really this another excuse t
 <table>
 	<tr>
 		<th width="360px" align="center">
-		<img width="360px">
+		<img width="220px" src="https://github.com/mfontanadev/POCs/blob/master/JSEngine_senoid/doc/JSEngine_leftside.png?raw=true">
 		</th>
 		<th width="360px" align="center">
 		<img width="360px" src="https://github.com/mfontanadev/POCs/blob/master/JSEngine_senoid/doc/JSEngine_senoid.gif?raw=true">
