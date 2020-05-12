@@ -1,8 +1,70 @@
+<!--
+First: thanks to @Javidx9, this was inspired in his youtube tutorials
+    OneLoneCoder.com - 3D Graphics Part #1 - Triangles & Projections
+    "Tredimensjonal Grafikk" - @Javidx9
+
+First.half: thanks to @threejs_org, light years from me.
+
+Second: license
+
+Third: about this and me.
+
+License
+~~~~~~~
+ThreeJS Senoid (I saw examples and its inputs controls and I wanted to make one). 
+Copyright (C) 2020 mfontanadev.
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions; See license for details.
+
+Original works located at:
+https://github.com/mfontanadev
+
+From mfontanadev :)
+~~~~~~~~~~~~~~~
+Hello! Use this as like as you want, I hope you can create amazing things 
+and have a lot of fun. Let me know. You acknowledge
+that I am not responsible for anything bad that happens as a result of
+your actions. However this code is protected by GNU GPLv3, see the license in the
+github repo. This means you must attribute me if you use it. You can view this
+license here: https://github.com/mfontanadev/POCs/blob/master/LICENSE
+Cheers!
+
+Background
+~~~~~~~~~~
+Sources: https://github.com/mfontanadev/POCs/tree/master/ThreeJS_senoid - ThreeJS Senoid (I saw examples and its inputs controls and I wanted to make one). 
+
+This programm helps me to understand how to make a ThreeJS example. You can
+use it as a template for your own examples and/or add new functions to this one.
+
+Video
+~~~~~
+PENDING
+
+Author
+~~~~~~
+site: https://mfontanadev.github.io
+twitter: https://twitter.com/mfontanadev
+git: https://github.com/mfontanadev
+linkedin: https://www.linkedin.com/in/mauricio-fontana-8285681b/?originalSubdomain=ar
+
+Last Updated: 18/04/2020
+-->
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<!-- Version 2.0 -->
-		<title>three.js - geometry senoid</title>
+		<title>three.js - geometry senoid v3.0</title>
+
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-161722306-1"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+
+		  gtag('config', 'UA-161722306-1');
+		</script>
+
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<link type="text/css" rel="stylesheet" href="files/main.css">
@@ -27,15 +89,29 @@
 			var scene, camera, renderer;
 			var geometry, group;
 			var mesh, lineSegments; 
+			var gui, orbit;
 
-			// Params
-			var faseAngle = 0;
+			var glFaseAngle = 0;
+
+			// GUI parameters that applies to all functions.
+			var C_MAX_SEGMENTS = 128; 
+
+			// Functions to calculate height in each vertex triangle.
+			var zFunctions = {
+				Revolution: new FunctionRevolution(),
+				RainDrop: new FunctionRainDrop(),
+				RainDropMulti: new FunctionRainDropMulti(),
+				Perlin: new FunctionPerlin()
+			}
 
 			var data = {
-				radious: 32,
+				functionType: "Revolution",
+				planeSize: 64,
+				radius: 32,
 				segments: 32,
 				frecuency: 1,
-				amplitude: 4
+				amplitude: 4,
+				oldFunctionType: "Revolution"
 			};
 
 			function load() 
@@ -48,38 +124,38 @@
 			{
 				container = document.getElementById( 'container' );
 
-				var gui = new dat.GUI();
+				// Set GUI input controls.
+				gui = new dat.GUI();
 				var folder = gui.addFolder( 'Senoid experiment' );
-
-				folder.add( data, 'radious', 16, 64 ).onChange( addSenoid );
-				folder.add( data, 'segments', 16, 64 ).step( 1 ).onChange( addSenoid );
-				folder.add( data, 'frecuency', 1, 8 ).step( 1 ).onChange( updateGeometry );
-				folder.add( data, 'amplitude', 1, 16 ).step( 1 ).onChange( updateGeometry );
+				folder.add( data, 'functionType', Object.keys( zFunctions )).onChange( updateSenoid );
+				folder.add( data, 'radius', 4, 128 ).onChange( updateSenoid );
+				folder.add( data, 'segments', 16, C_MAX_SEGMENTS ).step( 1 ).onChange( updateSenoid );
+				folder.add( data, 'frecuency', 1, 6 ).step( 1 ).onChange( saveGuiDataFrecuencyToCurrentFunction );
+				folder.add( data, 'amplitude', 1, 16 ).step( 1 ).onChange( saveGuiDataAmplitudeToCurrentFunction );
 				folder.open();
-				
-				//
+
+				// ThreeJS configuration.
 				scene = new THREE.Scene();
 				scene.background = new THREE.Color( 0xf0f0f0 );
 
-				//
+				// Camera default values, each time you change zFunction camera is recalculated.
 				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 2000 );
-				camera.position.z = 80;
-				camera.position.y = 45;
+				camera.position.z = 320;
+				camera.position.y = 160;
 				camera.position.x = 0;
 	            camera.lookAt( 0, 0, 0 );
 
-
-				//
+				// Render configuration.
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.body.appendChild( renderer.domElement );
 
-				//
-				var orbit = new THREE.OrbitControls( camera, renderer.domElement );
+				// Mouse input controls.
+				orbit = new THREE.OrbitControls( camera, renderer.domElement );
 				orbit.enableZoom = false;
 
-				//
+				// Add some generic lights.
 				var lights = [];
 				lights[ 0 ] = new THREE.PointLight( 0xffffff, 1, 0 );
 				lights[ 1 ] = new THREE.PointLight( 0xffffff, 1, 0 );
@@ -93,14 +169,14 @@
 				scene.add( lights[ 1 ] );
 				scene.add( lights[ 2 ] );
 
-				// 
+				zFunctions.Perlin.populateSeed(C_MAX_SEGMENTS);
 				addSenoid();
 
 				// Stats
 				stats = new Stats();
 				container.appendChild( stats.dom );
 
-				//
+				// Resize event.
 				window.addEventListener( 'resize', function () 
 				{
 					camera.aspect = window.innerWidth / window.innerHeight;
@@ -121,6 +197,54 @@
 				stats.update();
 			}
 
+			// Change faseAngle and calculate new vertex heights.
+			function updateGeometry()
+			{
+				zFunctions[data.functionType].updateVertexArray(geometry.attributes.position.array, glFaseAngle, );
+
+				glFaseAngle = ((glFaseAngle + 5) % 360);
+
+				// Tell ThreeJS that internal values of vertexes has been changed, so perform recalculations.
+				geometry.attributes.position.needsUpdate = true;
+			}
+
+			// Cycle through all the elements of vertex array and modifý z value. 
+			function applyZFunction(vertex)
+			{
+				var zf = zFunctions[data.functionType];
+
+			}
+
+			function updateSenoid()
+			{
+				saveGuiDataToFunction(zFunctions[data.oldFunctionType]);
+				addSenoid();
+			}
+
+			function saveGuiDataToFunction(zf)
+			{
+				var zfOld = zFunctions[data.oldFunctionType];
+				zfOld.params.camZ = camera.position.z;
+				zfOld.params.camY = camera.position.y;
+				zfOld.params.camX = camera.position.x;
+				zfOld.params.planeSize = data.planeSize;
+				zfOld.params.radius = data.radius;
+				zfOld.params.segments = data.segments;
+				zfOld.params.frecuency = data.frecuency;
+				zfOld.params.amplitude = data.amplitude;
+			}
+
+			function saveGuiDataFrecuencyToCurrentFunction()
+			{
+				zFunctions[data.functionType].params.frecuency = data.frecuency;
+			}
+			
+			function saveGuiDataAmplitudeToCurrentFunction()
+			{
+				zFunctions[data.functionType].params.amplitude = data.amplitude;
+			}
+
+			// Create geometry using current zFunction parameters.
 			function addSenoid()
 			{
 				if ( geometry !== undefined ) 
@@ -137,8 +261,11 @@
 					scene.remove( group );
 				}
 
+				var zf = zFunctions[data.functionType];
+				restoreGuiDataFromFunction(zf);
+
 				group = new THREE.Group();
-				geometry = new THREE.PlaneBufferGeometry(data.radious * 2, data.radious * 2, data.segments, data.segments);
+				geometry = new THREE.PlaneBufferGeometry(zf.params.planeSize, zf.params.planeSize, zf.params.segments, zf.params.segments);
 				var lineMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.5 } );
 				var meshMaterial = new THREE.MeshPhongMaterial( { color: 0x156289, emissive: 0x072534, side: THREE.DoubleSide, flatShading: true } );
 
@@ -152,36 +279,232 @@
 				scene.add( group );
 			}
 
-			function updateGeometry()
+			function restoreGuiDataFromFunction(zf)
 			{
-				faseAngle = ((faseAngle + 5) % 360);
-				
-				applyZFunction(geometry.attributes.position.array);
+				camera.position.z = zf.params.camZ; 
+				camera.position.y = zf.params.camY;
+				camera.position.x = zf.params.camX;
+				orbit.update();
 
-				geometry.attributes.position.needsUpdate = true;
-			}
+				data.planeSize = zf.params.planeSize;
+				data.radius = zf.params.radius;
+				data.segments = zf.params.segments;
+				data.frecuency = zf.params.frecuency;
+				data.amplitude = zf.params.amplitude;
+				data.oldFunctionType = data.functionType;
 
-			function applyZFunction(vertex)
-			{
-				var x, y;
-				for (var i = 0; i < vertex.length; i += 3 ) 
-				{
-					x = vertex[i + 0];
-					y = vertex[i + 1];
-
-					vertex[i + 2] = zFunction(x, y, data.frecuency, faseAngle, data.amplitude, data.radious);
+				for (var i in  gui.__folders["Senoid experiment"].__controllers) {
+				    gui.__folders["Senoid experiment"].__controllers[i].updateDisplay();
 				}
 			}
 
-			function zFunction(x, y, frecuency, faseAngle, amplitude, radious)
+			// ZFUNCTION (Revolution): Sine function rotated around X axe. 
+			// https://github.com/mfontanadev/POCs/tree/master/JSEngine_senoid
+			function FunctionRevolution() 
+			{
+				this.params = {
+					planeSize: 64,
+					radius: 32,
+					segments: 32,
+					frecuency: 1,
+					amplitude: 4,
+					camZ: 80,
+					camY: 45,
+					camX: 0
+				};
+			}
+
+			FunctionRevolution.prototype.updateVertexArray = function(vertex, faseAngle)
+			{
+				for (var i = 0; i < vertex.length; i += 3 ) 
+				{
+					vertex[i + 2] = this.getZ(vertex[i + 0], vertex[i + 1], faseAngle, this.params.radius, this.params.frecuency, this.params.amplitude);
+				}
+			}
+
+			FunctionRevolution.prototype.getZ = function(x, y, faseAngle, radius, frecuency, amplitude)
 			{
 				var ro = Math.sqrt((x * x) + (y * y));
-				var angle =  360 * (ro / radious);
+
+				// Poor way to fit function in a max radius.
+				var angle =  360 * (ro / radius);
 
 				var tita = angle * frecuency - faseAngle;
 	 			var z = Math.sin(tita * Math.PI / 180) * amplitude;
 
 				return z;
+			}
+
+			// ZFUNCTION (RainDrop): 3D sine function with decreasing amplitude.
+			function FunctionRainDrop() 
+			{
+				this.params = {
+					planeSize: 400,
+					radius: 90,
+					segments: 64,
+					frecuency: 2,
+					amplitude: 24,
+					camZ: 320,
+					camY: 160,
+					camX: 0
+				};
+			}
+
+			FunctionRainDrop.prototype.updateVertexArray = function(vertex, faseAngle)
+			{
+				for (var i = 0; i < vertex.length; i += 3 ) 
+				{
+					vertex[i + 2] = this.getZ(vertex[i + 0], vertex[i + 1], faseAngle, 0, 0, this.params.radius, this.params.frecuency, this.params.amplitude);
+				}
+			}
+
+			FunctionRainDrop.prototype.getZ = function(x, y, faseAngle, offsetX, offsetY, radius, frecuency, amplitude)
+			{
+				var px = x + offsetX;
+				var py = y - offsetY;
+
+				// This is a big thing, f(x, y) is formed by three parts:
+				//
+				// f(x, y) = DRAWFUNCTON(x, y) * DECREAING_AMPLITUDE(amplitu, radius) * ANULATOR(radius, d)
+				//
+				// d = distance (in x,y) from vertex to point (0, 0).
+
+				// DRAWFUNCTON(x, y) = cos( d )
+				// 		Drawing function, this part gives the shape to the function.
+				// DECREAING_AMPLITUDE(amplitu, radius)   
+				// 		Decreasing amplitude, this is a linear interpolation from max amplitude to 0 (can be whatever decreasing function)
+				// ANULATOR(radius, d)
+				// 		Anulator, trick to ensure that after a certain distance f (x, y) will be 0.
+
+				// DRAWFUNCTON
+				var d = Math.sqrt((px * px) + (py * py));
+				var angle = ((360 * (d / radius)) * frecuency) - faseAngle;
+				var fCos = Math.cos( angle * Math.PI / 180);
+
+				// DECREAING_AMPLITUDE
+				var fAmplitude = ((-1 * amplitude / radius) * d) + amplitude;  
+				
+				// ANULATOR
+				var red = (radius + 0.001) - d;		// radius epsilon distance.
+				var anulator = Math.floor( Math.sqrt( (red / Math.abs(red)) + 1 ));
+	 			
+	 			// f(x, y)
+	 			var z = fCos * fAmplitude * anulator * -1;
+
+				return z;
+			}
+
+			// ZFUNCTION (RainDropMulti): Same as RainDrop but three of them located at different places.
+			function FunctionRainDropMulti() 
+			{
+				this.rainDropFunction = new FunctionRainDrop();
+				
+				this.params = {
+					planeSize: 400,
+					radius: 100,
+					segments: 64,
+					frecuency: 2,
+					amplitude: 24,
+					camZ: 320,
+					camY: 160,
+					camX: 0
+				};
+			}
+
+			FunctionRainDropMulti.prototype.updateVertexArray = function(vertex, faseAngle)
+			{
+				var zAverage = 0;
+				var planeSizeQuarter = this.params.planeSize / 4;
+
+				for (var i = 0; i < vertex.length; i += 3 ) 
+				{
+					zAverage =  this.rainDropFunction.getZ(vertex[i + 0], vertex[i + 1], faseAngle, -planeSizeQuarter, 0, this.params.radius, this.params.frecuency, this.params.amplitude);
+					
+					zAverage +=  this.rainDropFunction.getZ(vertex[i + 0], vertex[i + 1], faseAngle, planeSizeQuarter, 0, this.params.radius, this.params.frecuency, this.params.amplitude);
+
+					zAverage +=  this.rainDropFunction.getZ(vertex[i + 0], vertex[i + 1], faseAngle, 0, planeSizeQuarter, this.params.radius, this.params.frecuency, this.params.amplitude);
+
+					vertex[i + 2] = zAverage / 3;
+				}
+			}
+
+			// ZFUNCTION (Perlin): A variation of Perlin noise.
+			// Using implementation of @javidx9 in Perlin noise tutorial video.
+			// You have to see https://www.youtube.com/watch?v=6-0UaeJBumA&t=1197s
+			function FunctionPerlin() 
+			{
+				this.params = {
+					planeSize: 64,
+					radius: 60,
+					segments: 64,
+					frecuency: 5,
+					amplitude: 4,
+					camZ: 80,
+					camY: 45,
+					camX: 0
+				};
+
+				this.seedWidth = 0;
+				this.seed = new Array();
+			}
+
+			FunctionPerlin.prototype.populateSeed = function(maxSegments)
+			{
+				this.seedWidth = maxSegments;
+
+				for (var iy = 0; iy < this.seedWidth + 1; iy++) 
+				{
+					for (var ix = 0; ix < this.seedWidth + 1; ix++)
+					{ 
+						this.seed[iy * this.seedWidth + ix] = Math.random();
+					}
+				}
+			}
+
+			// Changing height values of the vertices using a variation of Perlin noise algorithm.
+			// Thanks Ken Perlin. 
+			FunctionPerlin.prototype.updateVertexArray = function(vertex, faseAngle)
+			{
+				// Yes, I know, I am recycling parameters for these purposes, very bad.
+				nOctaves = this.params.frecuency;
+				fBias = 1 / this.params.amplitude;
+				fGlobalScale = this.params.radius / 10;
+				nWidth = this.params.segments + 1;
+
+				var index = 0;
+				// Used 1D Perlin Noise
+				for (var x = 0; x < nWidth; x++)
+				{
+					for (var y = 0; y < nWidth; y++)
+					{
+						var fNoise = 0;
+						var fScaleAcc = 0;
+						var fScale = 1;
+
+						for (var o = 0; o < nOctaves; o++)
+						{
+							var nPitch = nWidth >> o;
+							var nSampleX1 = Math.floor((x / nPitch)) * nPitch;
+							var nSampleY1 = Math.floor((y / nPitch)) * nPitch;
+							
+							var nSampleX2 = (nSampleX1 + nPitch) % nWidth;					
+							var nSampleY2 = (nSampleY1 + nPitch) % nWidth;
+
+							var fBlendX = (x - nSampleX1) / nPitch;
+							var fBlendY = (y - nSampleY1) / nPitch;
+
+							var fSampleT = (1 - fBlendX) * this.seed[nSampleY1 * this.seedWidth + nSampleX1] + fBlendX * this.seed[nSampleY1 * this.seedWidth + nSampleX2];
+							var fSampleB = (1 - fBlendX) * this.seed[nSampleY2 * this.seedWidth + nSampleX1] + fBlendX * this.seed[nSampleY2 * this.seedWidth + nSampleX2];
+
+							fScaleAcc += fScale;
+							fNoise += (fBlendY * (fSampleB - fSampleT) + fSampleT) * fScale;
+							fScale = fScale / fBias;
+						}
+
+						vertex[index * 3 + 2] = (fNoise / fScaleAcc) * fGlobalScale * -1;
+						index++;
+					}
+				}
 			}
 		</script>
 
