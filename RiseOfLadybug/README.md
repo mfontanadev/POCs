@@ -9,6 +9,8 @@ As always, this is the top of  the iceberg, in this project you will find a mini
 
 [https://mfontanadev.github.io/games/deployRiseOfLadybug/index.html](https://mfontanadev.github.io/games/deployRiseOfLadybug/index.html)
 
+Sources: [https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug](https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug)
+
 ## Motivation
 - Leave to the community a mini framework (javascript) for making your own games. This was inspired in @javidx9 youtube channel, he made "One Lone Console Engine", I tried to do something similar.
 - See how long it will take to be finished using David Wehle schedule, in short, one or two hours per day dedicated to the project.
@@ -53,8 +55,6 @@ To avoid cross-reference browser constraints, when you try to open index.html ju
 I think I will make a tutorial (leitmotiv). There are multiples concepts in this app, for example: mini game  framework in javascript, SPA using one only canvas, views, pages, game loop.
 
 ## References
-
-* Git source: [https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug](https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug)
 
 * Javidx9: [https://www.youtube.com/channel/UC-yuWVUplUJZvieEligKBkA](https://www.youtube.com/channel/UC-yuWVUplUJZvieEligKBkA)
 

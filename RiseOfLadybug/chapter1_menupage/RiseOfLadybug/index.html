@@ -1,0 +1,119 @@
+<!--
+First: thanks to @Javidx9, this was inspired in his youtube tutorials
+    OneLoneCoder.com - Olc Game Console Engine tutorial @Javidx9
+
+Second: license
+
+Third: about this and me.
+
+License
+~~~~~~~
+Rise of Ladybug (testing Ladybug.js class and much more). 
+Copyright (C) 2020 mfontanadev.
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions; See license for details.
+
+Original works located at:
+https://github.com/mfontanadev
+
+From mfontanadev :)
+~~~~~~~~~~~~~~~
+Hello! Use this as like as you want, I hope you can create amazing things 
+and have a lot of fun. Let me know. You acknowledge
+that I am not responsible for anything bad that happens as a result of
+your actions. However this code is protected by GNU GPLv3, see the license in the
+github repo. This means you must attribute me if you use it. You can view this
+license here: https://github.com/mfontanadev/POCs/blob/master/LICENSE
+Cheers!
+
+Background
+~~~~~~~~~~
+Title: 
+Sources: https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug 
+
+Minigame used for testing the ladybug sprite in the project Wishflower. 
+This helped my to test the class Ladybug.js in and isolated scenario. 
+But it became so funny that I couldn't resist to make a mini game.
+
+As always, this is the top of the iceberg, in this project you will 
+find a mini framework to make your own games in javascript I like 
+to call it "my version of SPA, using canvas".
+
+Video
+~~~~~
+PENDING
+
+Author
+~~~~~~
+site: https://mfontanadev.github.io
+twitter: https://twitter.com/mfontanadev
+git: https://github.com/mfontanadev
+linkedin: https://www.linkedin.com/in/mauricio-fontana-8285681b/?originalSubdomain=ar
+
+Last Updated: 07/07/2020
+-->
+
+<!DOCTYPE html>
+<read>
+	<html>
+		<head>
+
+			<!-- Title -->
+			<title>Rise of Ladybug v3.01</title>
+			<!-- Viewport -->
+			<meta name="viewport" content="height=device-height, width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=no">
+			<style>
+				body { margin: 0; }
+				idCanvas { width: 100%; height: 100%;}
+				image, canvas {
+				    user-select: none;
+				    -ms-user-select: none;
+				    -webkit-user-select: none;
+				    -khtml-user-select: none;
+				    -moz-user-select: none;
+				    -webkit-touch-callout: none;
+				    -webkit-user-drag: none;
+					-webkit-tap-highlight-color: rgba(0,0,0,0); 
+				}		
+			</style>
+						
+				
+			<!-- Custom Apis-->
+			<script src="lib/chel-dist/js/consts.js"></script>
+			<script src="js/globalDefinitions.js"></script>			
+			<script src="lib/chel-dist/js/chlib.js"></script>
+			<script src="lib/chel-dist/js/canvasControl.js"></script>
+			<script src="lib/chel-dist/js/bitmapManager.js"></script>
+			<script src="lib/chel-dist/js/soundManager.js"></script>
+			<script src="lib/chel-dist/js/mouseManager.js"></script>
+			<script src="lib/chel-dist/js/keyboardManager.js"></script>
+			<script src="lib/chel-dist/js/fontManager.js"></script>
+			<script src="lib/chel-dist/js/viewManager.js"></script>
+
+			<!-- Vendor Apis -->
+			<script src="lib/sound-0.6.1-dist/js/soundjs-0.6.1.min.js"></script>
+
+			<!-- Helpers -->
+			<script src="js/helpers/spriteHelper.js"></script>
+
+			<!-- Application logic -->
+			<script src="js/classes/animation.js"></script>
+			<script src="js/classes/ladybug.js"></script>
+
+			<!-- Pages -->
+			<script src="js/pages/ViewLadybug_menuPage.js"></script>
+			
+			<!-- Views -->
+			<script src="js/views/ViewLadybug_context.js"></script>
+			<script src="js/views/ViewLadybug_controller.js"></script>
+			
+			<script src="js/app.js"></script>
+		</head>
+
+		<body bgcolor="#808080">
+			<canvas id="idCanvas" width="480" height="640" style="solid #000000;"></canvas>
+		</body>
+	</html>
+</read>
+
