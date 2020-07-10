@@ -5,6 +5,10 @@ This section is the first iteration. You can see the main page and all the minim
 
 See root path for more details at:   [https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug](https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug)
 
+## Enjoy at
+
+[https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter1_menupage/index.html][(https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter1_menupage/index.html)
+
 ## Contact
 
 * site: [https://mfontanadev.github.io](https://mfontanadev.github.io)

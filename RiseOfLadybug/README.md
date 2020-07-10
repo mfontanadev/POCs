@@ -7,7 +7,7 @@ As always, this is the top of  the iceberg, in this project you will find a mini
 
 ## Enjoy at
 
-[https://mfontanadev.github.io/games/deployRiseOfLadybug/index.html](https://mfontanadev.github.io/games/deployRiseOfLadybug/index.html)
+Chapter1_menupage: [https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter1_menupage/index.html](https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter1_menupage/index.html)
 
 Sources: [https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug](https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug)
 
