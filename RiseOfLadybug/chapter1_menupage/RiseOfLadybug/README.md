@@ -7,7 +7,7 @@ See root path for more details at:   [https://github.com/mfontanadev/POCs/tree/m
 
 ## Enjoy at
 
-[https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter1_menupage/index.html][(https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter1_menupage/index.html)
+[https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter1_menupage/index.html](https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter1_menupage/index.html)
 
 ## Contact
 
