@@ -7,7 +7,7 @@ As always, this is the top of  the iceberg, in this project you will find a mini
 
 ## Enjoy at
 
-Chapter1_menupage: [https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter1_menupage/index.html](https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter1_menupage/index.html)
+Chapter2_interMissionPage: [https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter2_interMissionPage/index.html](https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter2_interMissionPage/index.html)
 
 Sources: [https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug](https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug)
 
@@ -36,10 +36,19 @@ Sources: [https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug](https:/
 </table>
 
 
+## Making of
+This section is about details of the development process.
+
+<b>Features map</b>
+An intent to summarizes in one picture all the game features, this gives you an idea of where was all the time put.
+But first, how that picture cames to life, as a merge between a patent prints and 80's LCD games reset mode.
+https://github.com/mfontanadev/POCs/blob/master/RiseOfLadybug/doc/ROLB_features_map_1.png?raw=true"
+
+Finally, the features map
+https://github.com/mfontanadev/POCs/blob/master/RiseOfLadybug/doc/ROLB_features_map_2.png?raw=true"
 
 
 ## Building a new version
-
 No steps must be performed, just modify source code and have fun.
 
 <b>Running locally:</b>
