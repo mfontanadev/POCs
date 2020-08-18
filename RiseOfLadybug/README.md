@@ -46,7 +46,10 @@ An intent to summarizes in one picture all the game features, this gives you an 
 But first, how that picture cames to life, as a merge between a patent prints and 80's LCD games reset mode.
 <img src="https://github.com/mfontanadev/POCs/blob/master/RiseOfLadybug/doc/ROLB_features_map_1.png?raw=true">
 
-Finally, the features map
+Finally, the features map, the idea is that you can see all the features in one picture and use it to estimate the total time to acomplish.
+In this case, assuming that you can solve one feature per hour, you will need more that twelve hours (minimal) in total.
+
+Another thing you can do is make a table with each feature and organize it in order of priority. In this case I should have resigned add some of them to avoid waste a bigger time.
 <img src="https://github.com/mfontanadev/POCs/blob/master/RiseOfLadybug/doc/ROLB_features_map_2.png?raw=true">
 
 ## Building a new version
