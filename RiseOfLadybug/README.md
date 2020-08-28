@@ -7,7 +7,7 @@ As always, this is the top of  the iceberg, in this project you will find a mini
 
 ## Enjoy at
 
-Chapter2_interMissionPage: [https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter2_interMissionPage/index.html](https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter2_interMissionPage/index.html)
+Chapter3_gamePage (playable version): [https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter3_gamePage/index.html](https://mfontanadev.github.io/games/deployRiseOfLadybug/chapter3_gamePage/index.html)
 
 Sources: [https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug](https://github.com/mfontanadev/POCs/tree/master/RiseOfLadybug)
 
