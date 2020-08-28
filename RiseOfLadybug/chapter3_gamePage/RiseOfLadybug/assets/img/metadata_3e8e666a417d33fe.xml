@@ -1,0 +1,160 @@
+﻿<?xml version='1.0' encoding='UTF-8'?>
+<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+
+<rdf:Description rdf:about='C:/Users/R440/Google Drive/Prototipos/RiseOfLadybug/chapter2_gamepage/RiseOfLadybug/assets/img/cherrytree_thumb_sakura.jpg'
+  xmlns:et='http://ns.exiftool.ca/1.0/' et:toolkit='Image::ExifTool 10.71'
+  xmlns:ExifTool='http://ns.exiftool.ca/ExifTool/1.0/'
+  xmlns:System='http://ns.exiftool.ca/File/System/1.0/'
+  xmlns:File='http://ns.exiftool.ca/File/1.0/'
+  xmlns:JFIF='http://ns.exiftool.ca/JFIF/JFIF/1.0/'
+  xmlns:Composite='http://ns.exiftool.ca/Composite/1.0/'>
+ 
+ <System:FileName>
+  <rdf:Description et:id='FileName' et:table='Extra'>
+   <et:desc>File Name</et:desc>
+   <et:prt>cherrytree_thumb_sakura.jpg</et:prt>
+  </rdf:Description>
+ </System:FileName>
+ <System:Directory>
+  <rdf:Description et:id='Directory' et:table='Extra'>
+   <et:desc>Directory</et:desc>
+   <et:prt>C:/Users/R440/Google Drive/Prototipos/RiseOfLadybug/chapter2_gamepage/RiseOfLadybug/assets/img</et:prt>
+  </rdf:Description>
+ </System:Directory>
+ <System:FileSize>
+  <rdf:Description et:id='FileSize' et:table='Extra'>
+   <et:desc>File Size</et:desc>
+   <et:prt>14 kB</et:prt>
+   <et:val>14101</et:val>
+  </rdf:Description>
+ </System:FileSize>
+ <System:FileModifyDate>
+  <rdf:Description et:id='FileModifyDate' et:table='Extra'>
+   <et:desc>File Modification Date/Time</et:desc>
+   <et:prt>2020:07:16 22:14:30-03:00</et:prt>
+  </rdf:Description>
+ </System:FileModifyDate>
+ <System:FileAccessDate>
+  <rdf:Description et:id='FileAccessDate' et:table='Extra'>
+   <et:desc>File Access Date/Time</et:desc>
+   <et:prt>2020:07:16 23:10:55-03:00</et:prt>
+  </rdf:Description>
+ </System:FileAccessDate>
+ <System:FileCreateDate>
+  <rdf:Description et:id='FileCreateDate' et:table='Extra'>
+   <et:desc>File Creation Date/Time</et:desc>
+   <et:prt>2020:07:16 23:10:55-03:00</et:prt>
+  </rdf:Description>
+ </System:FileCreateDate>
+ <System:FilePermissions>
+  <rdf:Description et:id='FilePermissions' et:table='Extra'>
+   <et:desc>File Permissions</et:desc>
+   <et:prt>rw-rw-rw-</et:prt>
+   <et:val>666</et:val>
+  </rdf:Description>
+ </System:FilePermissions>
+ <File:FileType>
+  <rdf:Description et:id='FileType' et:table='Extra'>
+   <et:desc>File Type</et:desc>
+   <et:prt>JPEG</et:prt>
+  </rdf:Description>
+ </File:FileType>
+ <File:FileTypeExtension>
+  <rdf:Description et:id='FileTypeExtension' et:table='Extra'>
+   <et:desc>File Type Extension</et:desc>
+   <et:prt>jpg</et:prt>
+   <et:val>JPG</et:val>
+  </rdf:Description>
+ </File:FileTypeExtension>
+ <File:MIMEType>
+  <rdf:Description et:id='MIMEType' et:table='Extra'>
+   <et:desc>MIME Type</et:desc>
+   <et:prt>image/jpeg</et:prt>
+  </rdf:Description>
+ </File:MIMEType>
+ <File:ImageWidth>
+  <rdf:Description et:id='ImageWidth' et:table='JPEG::SOF'>
+   <et:desc>Image Width</et:desc>
+   <et:prt>225</et:prt>
+  </rdf:Description>
+ </File:ImageWidth>
+ <File:ImageHeight>
+  <rdf:Description et:id='ImageHeight' et:table='JPEG::SOF'>
+   <et:desc>Image Height</et:desc>
+   <et:prt>170</et:prt>
+  </rdf:Description>
+ </File:ImageHeight>
+ <File:EncodingProcess>
+  <rdf:Description et:id='EncodingProcess' et:table='JPEG::SOF'>
+   <et:desc>Encoding Process</et:desc>
+   <et:prt>Progressive DCT, Huffman coding</et:prt>
+   <et:val>2</et:val>
+  </rdf:Description>
+ </File:EncodingProcess>
+ <File:BitsPerSample>
+  <rdf:Description et:id='BitsPerSample' et:table='JPEG::SOF'>
+   <et:desc>Bits Per Sample</et:desc>
+   <et:prt>8</et:prt>
+  </rdf:Description>
+ </File:BitsPerSample>
+ <File:ColorComponents>
+  <rdf:Description et:id='ColorComponents' et:table='JPEG::SOF'>
+   <et:desc>Color Components</et:desc>
+   <et:prt>3</et:prt>
+  </rdf:Description>
+ </File:ColorComponents>
+ <File:YCbCrSubSampling>
+  <rdf:Description et:id='YCbCrSubSampling' et:table='JPEG::SOF'>
+   <et:desc>Y Cb Cr Sub Sampling</et:desc>
+   <et:prt>YCbCr4:2:0 (2 2)</et:prt>
+   <et:val>2 2</et:val>
+  </rdf:Description>
+ </File:YCbCrSubSampling>
+ <File:JPEGQualityEstimate>
+  <rdf:Description et:id='JPEGQualityEstimate' et:table='Extra'>
+   <et:desc>JPEG Quality Estimate</et:desc>
+   <et:prt>90</et:prt>
+  </rdf:Description>
+ </File:JPEGQualityEstimate>
+ <File:JPEGDigest>
+  <rdf:Description et:id='JPEGDigest' et:table='Extra'>
+   <et:desc>JPEG Digest</et:desc>
+   <et:prt>Independent JPEG Group library (used by many applications), Quality 90</et:prt>
+   <et:val>50325a7b6e0a9b7f9aea8f5a6f7f31aa</et:val>
+  </rdf:Description>
+ </File:JPEGDigest>
+ 
+ <JFIF:ResolutionUnit>
+  <rdf:Description et:id='2' et:table='JFIF::Main'>
+   <et:desc>Resolution Unit</et:desc>
+   <et:prt>inches</et:prt>
+   <et:val>1</et:val>
+  </rdf:Description>
+ </JFIF:ResolutionUnit>
+ <JFIF:XResolution>
+  <rdf:Description et:id='3' et:table='JFIF::Main'>
+   <et:desc>X Resolution</et:desc>
+   <et:prt>96</et:prt>
+  </rdf:Description>
+ </JFIF:XResolution>
+ <JFIF:YResolution>
+  <rdf:Description et:id='5' et:table='JFIF::Main'>
+   <et:desc>Y Resolution</et:desc>
+   <et:prt>96</et:prt>
+  </rdf:Description>
+ </JFIF:YResolution>
+ <Composite:ImageSize>
+  <rdf:Description et:id='ImageSize' et:table='Composite'>
+   <et:desc>Image Size</et:desc>
+   <et:prt>225x170</et:prt>
+  </rdf:Description>
+ </Composite:ImageSize>
+ <Composite:Megapixels>
+  <rdf:Description et:id='Megapixels' et:table='Composite'>
+   <et:desc>Megapixels</et:desc>
+   <et:prt>0.038</et:prt>
+   <et:val>0.03825</et:val>
+  </rdf:Description>
+ </Composite:Megapixels>
+</rdf:Description>
+</rdf:RDF>
