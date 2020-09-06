@@ -25,7 +25,7 @@ https://mfontanadev.itch.io/micro-spy
 src="https://github.com/mfontanadev/POCs/blob/master/MicroSpy/doc/microspy_right_side.PNG?raw=true">
 		</th>
 		<th width="360px" align="center">
-		<img width="360px" src="https://github.com/mfontanadev/POCs/blob/master/MicroSpy/doc/microspy_left_side.PNG?raw=true">
+		<img width="360px" src="https://raw.githubusercontent.com/mfontanadev/POCs/master/MicroSpy/doc/microspy_left_side.PNG">
 		</th>
 	</tr>
 	<tr>
