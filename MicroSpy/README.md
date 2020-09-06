@@ -22,10 +22,10 @@ https://mfontanadev.itch.io/micro-spy
 	<tr>
 		<th width="360px" align="center">
 		<img width="360px"
-src="https://github.com/mfontanadev/POCs/blob/master/ThreeJS_senoid/doc/micropsy_left_side.PNG?raw=true">
+src="https://github.com/mfontanadev/POCs/blob/master/MicroSpy/doc/micropsy_left_side.PNG?raw=true">
 		</th>
 		<th width="360px" align="center">
-		<img width="360px" src="https://github.com/mfontanadev/POCs/blob/master/ThreeJS_senoid/doc/micropsy_right_side.PNG?raw=true">
+		<img width="360px" src="https://github.com/mfontanadev/POCs/blob/master/MicroSpy/doc/micropsy_right_side.PNG?raw=true">
 		</th>
 	</tr>
 	<tr>
