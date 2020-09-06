@@ -2,6 +2,7 @@
 # App "MicroSpy"
 
 Game developed for Jam2020 hosted by @javidx9 (detail in https://itch.io/jam/olc-codejam-2020)
+NOTE: I have to say that I don't feel proud of my code, it was programmed in a rush.
 
 **Game description**
 
