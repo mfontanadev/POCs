@@ -104,7 +104,7 @@ function MouseManager()
 	{
 		if ((typeof e !== 'undefined'))
 			e = e || window.event;
-			
+		
 		if (MouseManager.self.m_soundManager != null && MouseManager.self.m_soundManager.m_firstInit == false)
 		{
 			MouseManager.self.m_soundManager.initFirstSound();
@@ -114,6 +114,8 @@ function MouseManager()
 		MouseManager.self.m_mouseClick = true;
 		MouseManager.self.touchXY(e);
 		MouseManager.self.showPos();
+
+		e.preventDefault();
 	};
 
 	MouseManager.prototype.touchUp = function(e)
@@ -124,6 +126,8 @@ function MouseManager()
 		MouseManager.self.m_mouseClick = false;
 		MouseManager.self.touchXY(e);
 		MouseManager.self.showPos();
+
+		e.preventDefault();
 	};
 
 	MouseManager.prototype.touchXY = function(e)
@@ -157,6 +161,8 @@ function MouseManager()
 				MouseManager.self.m_mousePosY = MouseManager.self.m_mousePosY / MouseManager.self.m_canvasEx.m_scaleY;
 			}
 		}
+
+		e.preventDefault();
 	};
 
 	MouseManager.prototype.showPos = function ()
