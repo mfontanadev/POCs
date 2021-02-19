@@ -211,5 +211,5 @@ var global_levels_definition =
     }
 ];
 
-Globals.C_APPLICATION_TITLE_AND_VERSION = 'Ladybug flying test (v1.0.0)';
+Globals.C_APPLICATION_TITLE_AND_VERSION = 'Ladybug flying test (v1.0.2)';
 function Globals() {}

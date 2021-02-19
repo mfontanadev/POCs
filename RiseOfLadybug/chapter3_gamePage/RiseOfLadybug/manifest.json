@@ -1,0 +1,11 @@
+{
+  "background_color": "#FFF",
+  "display": "standalone",
+  "name": "Rise of Ladybug",
+  "short_name": "ROLB",
+  "version": "io.cordova.hellocordova",
+  "description": "Educational videogame. Guide ladybug to her hourse and avoid petals and branches.",
+  "author": "mfontanadev",
+  "icons": [],
+  "start_url": "index.html"
+}
