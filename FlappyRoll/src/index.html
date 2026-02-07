@@ -1,0 +1,2306 @@
+<!--
+INDEX:
+    1-Thanks.
+    2-License
+    3-This game.
+    4-the author.
+
+1-Thanks:
+~~~~~~~~~~~~~~~~~~~~
+Resources:
+    Kenny Yip (https://www.kennyyipcoding.com/), 
+    This game was inspired on his youtube tutorials: https://www.youtube.com/watch?v=jj5ADM2uywg    
+    Alfredo Genovese (https://www.fileteado.com/inicio) 
+    Flowers: https://www.facebook.com/montenegrofileteador/photos/a.823883470981996/1845969135440086/?id=720864561283888
+
+Sound effects:
+    Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=39303">freesound_community</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=39303">Pixabay</a>
+    Sound Effect by <a href="https://pixabay.com/users/djartmusic-46653586/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=306040">Krzysztof Szymanski</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=306040">Pixabay</a>
+    Sound Effect by <a href="https://pixabay.com/users/djartmusic-46653586/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=306041">Krzysztof Szymanski</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=306041">Pixabay</a>
+
+Tools: 
+    https://editor.audio/
+
+1-Licence:
+~~~~~~~~~~~~~~~~~~~~
+Flappy Roll. 
+Copyright (C) 2025 mfontanadev.
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions; See license for details.
+
+Original works located at: https://github.com/mfontanadev
+
+From mfontanadev :)
+Hello! Use this as like as you want, I hope you can create amazing things 
+and have a lot of fun. Let me know about your creations. You acknowledge
+that I am not responsible for anything bad that happens as a result of
+your actions. However this code is protected by GNU GPLv3, see the license in the
+github repo. This means you must attribute me if you use it. You can view this
+license here: https://github.com/mfontanadev/POCs/blob/master/LICENSE
+Cheers!
+
+3-This game.
+~~~~~~~~~~~~~~~~~~~~
+Title: Flappy Roll
+Sources: https://github.com/mfontanadev/POCs/tree/master/FlappyRoll 
+
+This time I based my inspiration in the real Flappy Bird and then added a twist. 
+The idea is that you need to stay between two bands (top and bottom), 
+they represent the flotation bands used in Argentina to contain the dollar.
+
+As always, this is the top of the iceberg, in this project you will 
+find references to motivation, tribute and a mini framework to make 
+your own games in javascript, I like to call it "my version of SPA, 
+using canvas".
+
+Video:
+
+4-About the author
+~~~~~~~~~~~~~~~~~~~~
+site: https://mfontanadev.github.io
+twitter: https://twitter.com/mfontanadev
+git: https://github.com/mfontanadev
+linkedin: https://www.linkedin.com/in/mauricio-fontana-8285681b/?originalSubdomain=ar
+
+Last Updated: 25/12/2025
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport", content="width=device-width, initial-scale=1.0">
+        
+        <title>Flappy Roll v2.8 by mfontanadev</title>
+        <style>
+            body {
+                text-align: center;
+                background-color: #3E3E3C;
+            }
+
+            .canvas-container {
+                display: flex;             
+                justify-content: center;   
+                align-items: center;       
+            }
+        </style>
+    </head>
+    <body>
+        <div class="canvas-container">
+            <canvas id="CANVAS"></canvas>
+        </div>
+
+        <script>
+            // resources
+            var redBallData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAJCAMAAAA4jZ0cAAAAn1BMVEUAAAAqGBWhAACjAACkAAClAACtAAC8AAC/AADfAACZAQKeAQCgAQGhAQGiAQGjAQGqAQHfAQCYAgKaAgKdAgLOAgDOAgGSAwOUAwOVAwKWAwKkAwO9AwKcBAODBgV/BwZ9CAdyCQnrCQdxCglpCwpbDQxRDw5NEQ9OEQ85FBI7FBI9FBE+FBE3FRIxFhQoFxUsFxUqGBX0HRr0Hhr/WlYpmPFcAAAAAnRSTlMA32D/An0AAAABYktHRDSpsen9AAAAG3RFWHRTb2Z0d2FyZQBQaG90b0RlbW9uIDIwMjQuMTLr4PFfAAAACXBIWXMAAA7EAAAOxAGVKw4bAAADJGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSfvu78nIGlkPSdXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQnPz4KPHg6eG1wbWV0YSB4bWxuczp4PSdhZG9iZTpuczptZXRhLycgeDp4bXB0az0nSW1hZ2U6OkV4aWZUb29sIDEyLjcwJz4KPHJkZjpSREYgeG1sbnM6cmRmPSdodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjJz4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOmV4aWY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vZXhpZi8xLjAvJz4KICA8ZXhpZjpQaXhlbFhEaW1lbnNpb24+ODwvZXhpZjpQaXhlbFhEaW1lbnNpb24+CiAgPGV4aWY6UGl4ZWxZRGltZW5zaW9uPjk8L2V4aWY6UGl4ZWxZRGltZW5zaW9uPgogPC9yZGY6RGVzY3JpcHRpb24+CgogPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICB4bWxuczp0aWZmPSdodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyc+CiAgPHRpZmY6SW1hZ2VMZW5ndGg+OTwvdGlmZjpJbWFnZUxlbmd0aD4KICA8dGlmZjpJbWFnZVdpZHRoPjg8L3RpZmY6SW1hZ2VXaWR0aD4KICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogIDx0aWZmOlJlc29sdXRpb25Vbml0PjI8L3RpZmY6UmVzb2x1dGlvblVuaXQ+CiAgPHRpZmY6WFJlc29sdXRpb24+OTYvMTwvdGlmZjpYUmVzb2x1dGlvbj4KICA8dGlmZjpZUmVzb2x1dGlvbj45Ni8xPC90aWZmOllSZXNvbHV0aW9uPgogPC9yZGY6RGVzY3JpcHRpb24+CjwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9J3InPz4uKWjDAAAAXElEQVR4AQFRAK7/AAAAADAxAAAAAAAtHxoYITEAAC4ZAxMKBB4AACQFEhMOFAMoACAMExwJFQYlACMCDRE0MggmACwLDxYzIhsvAAAnFxAHHSoAAAAAASspAAAA5VcFvayJlaAAAAAASUVORK5CYII=";
+
+            // debug
+            let context;
+
+            // game engine definitions
+            let game = {
+                engine : {
+                    RADIAN: (Math.PI / 180)
+                },
+                project: {
+                    imagesFolderPath: "images/",
+                    soundsFolderPath: "sounds/"
+                },
+                loop: {
+                    allResourcesLoaded: false,
+                    resourcesLoadedCounter: 0
+                }, 
+                debug : {
+                    enabled: false,
+                    CHECK_COLLISIONS: true,
+                    SHOW_COLLISION_RECTANGLES: false,
+                    DEBUG_LINES : 8,
+                    DEBUG_LINE_HEIGHT : 22
+                },
+                keyboard : {
+                    primaryButton : {key1 : ' ',    key2 : 'ARROWUP',   pressed: false, waitRelease : false},
+                    soundButton :   {key1 : 'S',    key2 : 'S',         pressed: false, waitRelease : false},
+                    webButton :     {key1 : 'W',    key1 : 'W',         pressed: false, waitRelease : false}
+                },
+                mouse : {
+                    offsetX : 0,
+                    offsetY : 0,
+                },
+                canvas : {
+                    WIDTH : 0,
+                    HEIGHT : 640,
+                    HALF_WIDTH : 0,
+                    HALF_HEIGHT : 640 >> 1,
+                    offsetX : -1,
+                    offsetY : -1
+                },
+                ux : {
+                    font : {
+                        image : null,
+                        C_KEY_MAP : "MY:/0123456789=",
+                        width : 36,
+                        height : 36
+                    }
+                },
+                sound : {
+                    enabled : true
+                },
+                navigation : {
+                    C_SCREEN_MENU : "MENU",
+                    C_SCREEN_PLAYING : "PLAYING",
+                    C_SCREEN_GAME_OVER : "GAME_OVER",
+                    currentScreen : 0        
+                },
+                state :
+                 {
+                    C_STATE_NOT_SET : 0,
+                    C_STATE_PLAYER_ALIVE : 1,
+                    C_STATE_PLAYER_DYING : 2,
+                    currentState : 0
+                },
+                sndManager : [],
+                imgManager : [],
+                gameRules : {
+                    openingSpace : 0
+                }
+            }
+
+            // game logic default values
+            let config = {
+                general : {
+                    WANTED_PUSHERS_PER_WIDTH : 12,
+                    // velocity for all the interceptors logic.
+                    C_GLUE_FORCE : 8,
+                    // delta value when interceptor logic stops cycling.
+                    C_INTERCEPTOR_BREAK_VALUE : 0.1,
+                    // Number of resources to wait after game starts looping. 
+                    // It is calculated based on image and sound collections
+                    C_RESOURCES_TO_BE_LOADED : 0
+                },
+                pushers : {
+                    WIDTH: 30,
+                    HEIGHT: 30
+                },
+                stockIndicator : {
+                    C_SIZE : 16,
+                    C_GAP : 12,
+                    C_NORMAL_COLOR : "green",
+                    C_SMALL_COLOR : "red",
+                    C_PADDING : 50                   
+                },
+                explode : {
+                    // frame change velocity in fps.
+                    C_ANIM_SPEED : 5,
+                    // clipping rectangle size
+                    C_FRAME_SIZE : 190,
+                    // clipping rectangle size
+                    C_RENDER_SIZE : 140,
+                    // animation's frames count
+                    C_MAX_FRAMES : 7
+                },
+                player : {
+                    // unit is in pusher's width.
+                    C_PLAYER_LEFT_MARGIN : 2.5,   
+                    // wing velocity in fps.
+                    C_ANIM_SPEED : 6,           
+                    // player's jump force
+                    C_JUMP_FORCE : 4,
+                    // player's speed           
+                    C_VELOCITY : 5,       
+                    // change image if acceleration reaches -4    
+                    C_SHOW_UP_FRAME_WHEN_VELOCITY : -4,
+                    // change image if acceletarion reaches 4
+                    C_SHOW_DOWN_FRAME_WHEN_VELOCITY : 4
+                },
+                gameOverBanner : {
+                    // y positions for translate animation
+                    C_START_POSITION : game.canvas.HEIGHT + 50,
+                    C_MIDDLE_POSITION : game.canvas.HALF_HEIGHT,
+                    C_END_POSITION : game.canvas.HEIGHT + 100
+                },
+                helpAnimation : {
+                    // frame change velocity in fps.
+                    C_ANIM_SPEED : 15
+                },
+                background : {
+                    // frame change velocity in fps.
+                    C_ANIM_SPEED : 4,
+                    C_BUILDINGS_OFFSET_Y : 216
+                },
+                tunnel : {
+                    // max height of the tunnel 
+                    C_MAX_OPENING_SPACE : 100,
+                    // min height of the tunnel 
+                    C_MIN_OPENING_SPACE : 75,
+                    // initial gap space when player is on extra weeks 
+                    C_DEFAULT_MIN_OPENING_SPACE : 90,
+                    // amount of steps from start and end value in the interpolation logic
+                    C_INTERPOLATION_STEPS : 12,
+                    // starting year is the same as stock values serie.
+                    C_STARTING_YEAR : 2023,
+                    // max size of distotion applied to random generator (px)
+                    C_RANDOM_OPENING : 100,
+                    // get one point if when player is in the middle of an extra week and reach the pusher number 6
+                    C_PUSHER_INDEX_TO_GET_BONUS : 6
+                },
+                // buttons on the bottom bar
+                footerBar : {
+                    // distance from the center of the screen (px)
+                    C_GAP_SIZE : 35,
+                    // y position from the bottom of the screen (px)
+                    C_OFFSET_Y : 25,
+                    // size (px)
+                    C_BUTTON_SIZE : 35,
+                    C_TWITTX_URL : "https://x.com/mfontanadev"
+                },
+                bonus : {
+                    C_ANIM_SPEED : 4,
+                    BONUS_PROBABILITY : 0.9
+                },
+                tail : {
+                    // In frames (60 frames = 1 second)
+                    C_ALIVE_DURATION : 60 * 10,
+                    C_EXTRA_OPENING_SPACE : 50,
+                    C_START_DYING: 30
+                },
+                sndManager : {
+                    BONUS : {index: -1, filename : "sfx_bonus.wav"},
+                    EXPLODE_TAIL: {index: -1, filename : "sfx_explode_tail.wav"},
+                    JUMP : {index: -1, filename : "sfx_jump.wav"},
+                    EXPLODE : {index: -1, filename : "sfx_explode.wav"},
+                    POINT : {index: -1, filename : "sfx_point.wav"},
+                    SOUND_ON : {index: -1, filename : "sfx_sound_on.wav"},
+                    SOUND_OFF : {index: -1, filename : "sfx_sound_off.wav"}
+                },
+                imgManager : {
+                    FONT : {index : -1, filename : "font.png"},
+                    PUSHER_TOP : {index : -1, filename : "top_pusher.png"},
+                    PUSHER_TOP_RED : {index : -1, filename : "top_pusher_red.png"},
+                    PUSHER_BOTTOM : {index : -1, filename : "bottom_pusher.png"},
+                    PUSHER_BOTTOM_RED : {index : -1, filename : "bottom_pusher_red.png"},
+                    PLAYER : {index : -1, filename : "flappy_player_pix.png"},
+                    PLAYER_1 : {index : -1, filename : "flappy_player_1_pix.png"},
+                    PLAYER_UP : {index : -1, filename : "flappy_player_up_pix.png"},
+                    PLAYER_DOWN : {index : -1, filename : "flappy_player_down_pix.png"},
+                    PLAYER_BURNT : {index : -1, filename : "flappy_player_pix_burnt.png"},
+                    PLAYER_1_BURNT : {index : -1, filename : "flappy_player_1_pix_burnt.png"},
+                    PLAYER_UP_BURNT : {index : -1, filename : "flappy_player_up_pix_burnt.png"},
+                    PLAYER_DOWN_BURNT : {index : -1, filename : "flappy_player_down_pix_burnt.png"},
+                    EXPLODE : {index : -1, filename : "explode_anim.png"},
+                    BANNER : {index : -1, filename : "banner.png"},
+                    GAMEOVER_TEXT : {index : -1, filename : "gameover_text.png"},
+                    RED_RIBBON : {index : -1, filename : "red_ribbon.png"},
+                    BACKGROUND : {index : -1, filename : "background.png"},
+                    BUILDINGS : {index : -1, filename : "layer_buildings.png"},
+                    CLOUD : {index : -1, filename : "cloud.png"},
+                    BONUS : {index : -1, filename : "blue_roll.png"},
+                    TITLE : {index : -1, filename : "title_text.png"},
+                    FLAG_RIBBON : {index : -1, filename : "flag_ribbon.png"},
+                    SOUND_ON : {index : -1, filename : "sound_on.png"},
+                    SOUND_OFF : {index : -1, filename : "sound_off.png"},
+                    CREDITS : {index : -1, filename : "credits.png"},
+                    CALL_OUT_000 : {index : -1, filename : "callout_000.png"},
+                    CALL_OUT_001 : {index : -1, filename : "callout_001.png"},
+                    CALL_OUT_002 : {index : -1, filename : "callout_002.png"},
+                    CALL_OUT_003 : {index : -1, filename : "callout_003.png"},
+                    CALL_OUT_004 : {index : -1, filename : "callout_004.png"} 
+                }
+            }
+
+            let redBall;
+
+            let titleBanner;
+
+            let tunnel;
+
+            let player;
+
+            let background;
+
+            let helpAnimation;
+
+            let stockIndicator;
+
+            let score;
+
+            let gameOverBanner;
+
+            let pusher = {
+                x : 0,
+                y : 0
+            }
+
+            let footerBar;
+
+            // **** Entry point ****
+            window.onload = function() {
+                constructors();
+
+                setupGraphicContext();
+                
+                setupKeyboardEvents();
+
+                runUnitTests();
+
+                requestAnimationFrame(waitForAllTheResourcesToBeLoaded)
+            
+                loadResources();
+            }
+
+            function constructors() {
+                game.canvas.WIDTH = config.pushers.WIDTH * config.general.WANTED_PUSHERS_PER_WIDTH;
+                game.canvas.HALF_WIDTH = game.canvas.WIDTH >> 1;
+
+                titleBanner = new TitleBanner();
+                score = new Score();
+                gameOverBanner = new GameOverBanner(score);
+                tunnel = new Tunnel(score);
+                player = new Player(tunnel);
+                background = new Background()
+                helpAnimation = new HelpAnimation(player);
+                footerBar = new FooterBar();
+            }
+
+            function gameLoop() {
+                context.clearRect(0, 0, CANVAS.width, CANVAS.height);
+
+                if (game.navigation.currentScreen === game.navigation.C_SCREEN_MENU) {
+                    screenMenu_processInputs();
+                }
+                else if (game.navigation.currentScreen === game.navigation.C_SCREEN_PLAYING) {
+                    screenPlaying_processInputs();
+                }
+                else if (game.navigation.currentScreen === game.navigation.C_SCREEN_GAME_OVER) {
+                    screenGameOver_processInputs();
+                }
+
+                renderDebugMode();
+
+                requestAnimationFrame(gameLoop);
+            }
+
+            // **** Menu screen ****
+            function screenMenu_init() {
+                setState(game.state.C_STATE_PLAYER_ALIVE);
+
+                titleBanner.reset();
+                score.reset();
+                tunnel.reset();
+                player.reset();
+                helpAnimation.reset();
+                background.reset();
+                footerBar.reset();
+
+                game.canvas.offsetX = 0;
+                game.canvas.offsetY = 0;
+                game.gameRules.openingSpace = config.tunnel.C_DEFAULT_MIN_OPENING_SPACE; 
+            }
+
+            function screenMenu_processInputs() {
+                footerBar.processInputs();
+
+                if (processButtonAction(game.keyboard.primaryButton, null)) {
+                    navigateTo(game.navigation.C_SCREEN_PLAYING);
+                    player.jump(); 
+                }
+
+                this.screenMenu_updateGameLogic();
+            }
+
+            function screenMenu_updateGameLogic() {
+                player.updateWingAnimation();
+                helpAnimation.updateGameLogic();
+                titleBanner.updateGameLogic();
+
+                this.screenMenu_render();
+            }
+
+            function screenMenu_render() {
+                background.render();
+
+                tunnel.render();
+                player.render();
+                helpAnimation.render();
+                titleBanner.render();
+                footerBar.render();
+            }
+            
+            // **** Playing Screen****
+            function screenPlaying_init() {
+                titleBanner.startFadeOut();
+                score.startFadeIn();
+            }
+
+            function screenPlaying_processInputs() {
+                if (processButtonAction(game.keyboard.primaryButton, null)) {
+                    player.processInputs();
+                }
+
+                this.screenPlaying_updateGameLogic();
+            }
+
+            function screenPlaying_updateGameLogic() {               
+                player.updateGameLogic();
+
+                if (!isState(game.state.C_STATE_PLAYER_DYING))
+                {
+                    tunnel.updateGameLogic();
+                    titleBanner.updateGameLogic();
+                    score.updateGameLogic();
+
+                    if (player.died) {
+                        setState(game.state.C_STATE_PLAYER_DYING);
+                        player.startDyingAnimation();
+                    }
+
+                    background.updateGameLogic();
+                }
+
+                this.screenPlaying_render();
+            }
+
+            function screenPlaying_render() {
+                background.render();
+
+                tunnel.render();
+                player.render();
+
+                score.render();
+                titleBanner.render();
+            }
+
+            // **** Game over screen ****
+            function screenGameOver_init() {
+                gameOverBanner.reset();
+                gameOverBanner.startFadeIn(); 
+                footerBar.reset();
+            }
+
+            function screenGameOver_processInputs() {
+                footerBar.processInputs();
+
+                if (processButtonAction(game.keyboard.primaryButton) &&
+                    gameOverBanner.middlePositionReached() === true ) {
+                    gameOverBanner.startFadeOut();
+                }
+                
+                screenGameOver_updateGameLogic();
+            }
+
+            function screenGameOver_updateGameLogic() {
+                player.updateWingAnimation();
+                gameOverBanner.updateGameLogic();
+
+                if (gameOverBanner.endPositionReached()) {
+                    navigateTo(game.navigation.C_SCREEN_MENU);
+                }
+
+                screenGameOver_render();
+            }
+
+            function screenGameOver_render() {
+                background.render();
+
+                tunnel.render();
+                player.render();
+
+                gameOverBanner.render();
+
+                footerBar.render();
+            }
+
+            // ***** Classes *****
+            function Bonus() {
+                this.x;
+                this.baseY;
+                this.y;
+                this.collisionRect;
+
+                this.verticalMovementCounter;
+                this.verticalMovementSpeed;
+                this.angle;
+
+                this.enabled;
+
+                this.sound;
+
+                this.reset = function(_x, _y) {                   
+                    this.x = _x;
+                    this.baseY = _y;
+                    this.y = this.baseY;
+                    this.collisionRect = {
+                        x: 0, 
+                        y: 0, 
+                        width: getImage(config.imgManager.BONUS).width,
+                        height: getImage(config.imgManager.BONUS).height};
+
+                    this.verticalMovementCounter = 0;
+                    this.verticalMovementSpeed = 1;
+                    this.angle = 0;
+
+                    this.enabled = false;
+                }
+
+                this.updateGameLogic = function() {
+                    if (!this.enabled)
+                        return;
+
+                    this.verticalMovementCounter++;
+                    if (this.verticalMovementCounter > this.verticalMovementSpeed) {
+                        this.verticalMovementCounter = 0;
+                        this.angle = (this.angle + 15) % 360;
+                    }
+
+                    this.y = this.baseY + (math_sin(this.angle) * 5) - game.canvas.offsetY;;
+                }
+
+                this.render = function() {
+                    if (!this.enabled)
+                        return;
+
+                    drawImageCentered(config.imgManager.BONUS, this.x , this.y);                    
+
+                    drawCollisionRectangle(this.getRect());
+                }
+                
+                this.setEnabled = function(_x, _y) {
+                    this.reset(_x, _y);
+                    this.enabled = true;
+                }
+
+                this.setDisabled = function() {
+                    this.enabled = false;
+                    playSound(config.sndManager.BONUS);
+                }
+
+                this.isEnabled = function() {
+                    return this.enabled;
+                }
+
+                this.getRect = function() {
+                    this.collisionRect.x = this.x - (this.collisionRect.width >> 1); 
+                    this.collisionRect.y = this.y + (this.collisionRect.height >> 1); 
+                    return this.collisionRect;
+                }
+
+            }
+
+            function Tail() {
+                this.explode = new Explode(config.explode.C_RENDER_SIZE >> 1);
+
+                this.x;
+                this.y;
+                this.width;
+                this.height;
+
+                this.verticalMovementCounter;
+                this.verticalMovementSpeed;
+                this.angle;
+
+                this.diying;
+                this.enabled;
+                this.aliveCounter;
+
+                this.interceptor = new Interceptor(config.general.C_GLUE_FORCE);
+
+                this.reset = function(_y) {
+                    this.x = config.pushers.WIDTH * 0.75;
+                    this.y = _y;
+                    this.width = getImage(config.imgManager.BONUS).width;
+                    this.height = getImage(config.imgManager.BONUS).height;
+
+                    this.verticalMovementCounter = 0;
+                    this.verticalMovementSpeed = 1;
+                    this.angle = 0;
+                    this.diying = false;
+                    this.enabled = false;
+                    this.aliveCounter = config.tail.C_ALIVE_DURATION;
+
+                    this.interceptor.reset();
+                    this.interceptor.set(this.y, this.y);
+                    
+                    this.explode.reset(this.x, this.y);
+                }
+
+                this.updateGameLogic = function() {
+                    if (!this.enabled)
+                        return;
+                    
+                    if (this.diying) {   
+                        this.explode.updateGameLogic();
+
+                        if (this.explode.animCounter === -1) {
+                            this.enabled = false;
+                        }
+                    } 
+                    else {
+                        this.interceptor.updateGameLogic();
+                        this.y = this.interceptor.getCurrent();
+
+                        this.aliveCounter -= 1;
+                        if (this.aliveCounter === config.tail.C_START_DYING) {
+                            this.startDyingAnimation();
+                        }
+                        else
+                        {
+                            let aliveScalar = ((this.aliveCounter) / config.tail.C_ALIVE_DURATION);
+                            this.width = getImage(config.imgManager.BONUS).width * aliveScalar; 
+                            this.height = getImage(config.imgManager.BONUS).height * aliveScalar; 
+                        }
+                    }
+                }
+
+                this.render = function() {
+                    if (!this.enabled)
+                        return;
+
+                    if (this.diying) {
+                        this.explode.render();
+                    }
+                    else {
+                        drawImageCenteredWH(config.imgManager.BONUS, this.x , this.y, this.width, this.height);                    
+                    }
+                }
+
+                this.newTarget = function(_target) {
+                    this.interceptor.newTarget(_target);
+                }
+
+                this.startDyingAnimation = function() {
+                    if (!this.enabled)
+                        return;
+
+                    this.explode.x = this.x;  
+                    this.explode.y = this.y;
+                    this.diying = true;
+                    playSound(config.sndManager.EXPLODE_TAIL);
+                }
+
+                this.setEnabled = function(_y) {
+                    this.reset(_y);  
+                    this.enabled = true;
+                }
+
+                this.isEnabled =  function() {
+                    return this.enabled;
+                }
+             }
+
+            function Interceptor(_glueForce) {
+                this.glueForce = _glueForce;
+                this.current = 0;
+                this.target = 0;
+                this.delta = 0;
+
+                this.reset = function() {
+                    this.current = 0;
+                    this.target = 0;
+                    this.delta = 0;
+                }
+
+                this.updateGameLogic = function() {
+                    this.delta = this.getDelta();
+
+                    if (this.endReached()) {
+                        this.current = this.target;
+                    }
+                    else {
+                        this.current += this.delta;
+                    }
+                }
+                
+                this.getDelta = function() {
+                    return ((this.target - this.current) / this.glueForce);
+                }
+
+                this.endReached = function() {
+                    return Math.abs(this.delta) < config.general.C_INTERCEPTOR_BREAK_VALUE;
+                }
+
+                this.set = function(_current, _target) {
+                    this.current = _current;
+                    this.target = _target;
+                    this.delta = 0;
+                }
+
+                this.getCurrent = function() {
+                    return this.current;
+                }
+
+                this.newTarget = function(_target) {
+                    this.target =_target;
+                    this.delta = 0;
+                }
+            }
+
+            function Background() {
+                this.x = 0;
+                this.y = 0;
+
+                this.buildingsOffset = 0;
+                this.buildingsCounter = 0;
+                this.buildingsSpeed = 0;
+                this.buildingsWith = 0;
+
+                this.cloudSpeed = 0;
+                this.cloudCounter = 0;
+                this.arrCloud = [];
+
+                this.reset = function() {
+                    this.x = game.canvas.HALF_WIDTH;
+                    this.y = game.canvas.HALF_HEIGHT;
+
+                    this.buildingsOffset = 0;
+                    this.buildingsCounter = 0;
+                    this.buildingsSpeed = config.background.C_ANIM_SPEED;
+                    this.buildingsWith = getImage(config.imgManager.BUILDINGS).width >> 1;
+
+                    this.arrCloud = [];
+                    this.arrCloud.push({x : 170,    y : 146, sizeX: 100, sizeY: 34});
+                    this.arrCloud.push({x : 24,     y : 233, sizeX: 120, sizeY: 38});
+                    this.arrCloud.push({x : 339,    y : 212, sizeX: 150, sizeY: 47});
+                    this.arrCloud.push({x : 322,    y : 331, sizeX: 150, sizeY: 47});
+                    this.arrCloud.push({x : 87,     y : 385, sizeX: 150, sizeY: 47});
+
+                    this.cloudSpeed = config.background.C_ANIM_SPEED * 3;
+                    this.cloudCounter = 0;
+                }
+
+                this.updateGameLogic = function() {
+                    this.updateBuildingLogic();
+                    this.updateCloudLogic();
+                }
+
+                this.updateBuildingLogic = function() {
+                    this.buildingsCounter++;
+                    if (this.buildingsCounter > this.buildingsSpeed) {
+                        this.buildingsCounter = 0;
+
+                        this.buildingsOffset = this.buildingsOffset + 1;
+                        if (this.buildingsOffset >= this. buildingsWith ) {
+                            this.buildingsOffset = 0;
+                        }
+                    }
+                }
+
+                this.updateCloudLogic = function() {
+                    this.cloudCounter++;
+                    if (this.cloudCounter > this.cloudSpeed) { 
+                        this.cloudCounter = 0;
+
+                        this.arrCloud.forEach(item => {
+                            item.x -= 1;
+
+                            if (item.x < -(item.sizeX)) {
+                                item.x = game.canvas.WIDTH + (item.sizeX >> 1); 
+                            }
+                        });
+                    }
+                }
+
+                this.render = function() {
+                   
+                    /* Realtime sky gradient effect */ 
+                    let skyOffset = game.canvas.offsetY >> 4;
+                    let grd = context.createLinearGradient(0, skyOffset, 0, game.canvas.HEIGHT + skyOffset);
+                    grd.addColorStop(0, rgbaToColor(3, 12, 18, 1));
+                    grd.addColorStop(0.1, rgbaToColor(30, 30, 64, 1));
+                    grd.addColorStop(0.5, rgbaToColor(33, 122, 180, 1));
+                    grd.addColorStop(1, rgbaToColor(219, 248, 243, 1));
+                    context.fillStyle = grd;
+                    context.fillRect(0, 0, game.canvas.WIDTH, game.canvas.HEIGHT - 60)
+
+                    // Clouds
+                    this.arrCloud.forEach(item => {
+                        drawImageCenteredWH(config.imgManager.CLOUD, item.x, game.canvas.HEIGHT - item.y - skyOffset, item.sizeX, item.sizeY);                    
+                    });
+
+                    // Buildings
+                    drawImageCentered(config.imgManager.BUILDINGS, this.buildingsWith - this.buildingsOffset, game.canvas.HALF_HEIGHT - config.background.C_BUILDINGS_OFFSET_Y);                    
+
+                    drawImageCentered(config.imgManager.BACKGROUND, game.canvas.HALF_WIDTH, game.canvas.HALF_HEIGHT);                    
+                }
+            }
+
+            function TitleBanner() {
+                this.x = 0;
+                this.y = 0;
+
+                this.interceptor = new Interceptor(config.general.C_GLUE_FORCE);
+                
+                this.reset = function() {
+                    this.interceptor.reset();
+                    this.x = game.canvas.HALF_WIDTH;
+                    this.startFadeIn();
+                    this.y = this.interceptor.getCurrent();
+                }
+
+                this.updateGameLogic = function() {
+                    this.interceptor.updateGameLogic();
+                    this.y = this.interceptor.getCurrent();
+                }
+
+                this.render = function() {
+                    drawImageCentered(config.imgManager.BANNER, this.x, this.y);
+                    drawImageCentered(config.imgManager.TITLE, this.x, this.y + 10);
+                    drawImageCentered(config.imgManager.FLAG_RIBBON, this.x, this.y - 40);
+                }
+
+                this.startFadeIn = function() {
+                    this.interceptor.set(game.canvas.HEIGHT * 1.5, game.canvas.HEIGHT - 100);
+                }
+
+                this.startFadeOut = function() {
+                    this.interceptor.set(game.canvas.HEIGHT - 100, game.canvas.HEIGHT * 1.5);
+                }
+            }
+
+            function HelpAnimation(_player) {
+                this.indexes;
+
+                this.animCurrentFrame = 0;
+                this.animCounter = 0;
+                this.animSpeed = 0;
+
+                this.x = 0;
+                this.y = 0;
+
+                this.depPlayer = _player;
+
+                this.reset = function() {
+                    this.animCurrentFrame = 0;
+                    this.animCounter = 0;
+                    this.animSpeed = config.helpAnimation.C_ANIM_SPEED;
+
+                    this.x = this.depPlayer.x * 2.5;
+                    this.y = this.depPlayer.y;
+
+                    this.indexes = [];
+                    this.indexes.push(config.imgManager.CALL_OUT_000);
+                    this.indexes.push(config.imgManager.CALL_OUT_001);
+                    this.indexes.push(config.imgManager.CALL_OUT_002);
+                    this.indexes.push(config.imgManager.CALL_OUT_003);
+                    this.indexes.push(config.imgManager.CALL_OUT_004);
+                }
+
+                this.updateGameLogic = function() {
+                    this.updateAnimation();
+                }
+
+                this.updateAnimation = function() {
+                    this.animCounter++;
+                    if (this.animCounter > this.animSpeed) {
+                        this.animCounter = 0;
+
+                        this.animCurrentFrame++;
+                        if (this.animCurrentFrame === this.indexes.length) {
+                            this.animCurrentFrame = 0;
+                        }
+                    }
+                }
+
+                this.render = function() {
+                    drawImageCentered(this.indexes[this.animCurrentFrame], this.x, this.y);                    
+                }
+            }
+
+            function StockIndicator() {
+                this.y = 0;
+                this.interceptor = new Interceptor(config.general.C_GLUE_FORCE);
+                this.textValue = 0;
+                this.size = config.stockIndicator.C_SIZE;
+                this.tunnelOffsetY = 0;
+                
+                this.stockValue = 0;
+                this.isExtraWeek = false;
+
+                this.reset = function() {
+                    this.interceptor.reset();
+                    this.y = this.interceptor.getCurrent();
+                    this.textValue = 0;
+                    this.size = config.stockIndicator.C_SIZE;
+                    this.tunnelOffsetY = 0;
+                    
+                    this.stockValue = 0;
+                    this.isExtraWeek = false;
+                }
+
+                this.updateGameLogic = function() {
+                    this.size = this.getMiddleSizeIfStockItemIsThin();
+                    this.textValue = (this.stockValue - this.tunnelOffsetY);  
+
+                    this.interceptor.set(this.y, this.stockValue)
+                    this.interceptor.updateGameLogic();
+                    this.y = this.interceptor.getCurrent();
+                }
+
+                this.render = function() {
+                    if (this.y > 0) {
+                        let prjX = (game.canvas.WIDTH - config.stockIndicator.C_PADDING) + config.stockIndicator.C_SIZE;
+                        let prjY = game.canvas.HEIGHT - this.y + game.canvas.offsetY;
+                        let color =  config.stockIndicator.C_NORMAL_COLOR;
+
+                        context.fillStyle = 'rgba(0, 0, 0, .5)';
+                        context.fillRect(prjX - config.stockIndicator.C_SIZE - 2, prjY - config.stockIndicator.C_GAP, 75, 25);
+                        drawText(prjX - config.stockIndicator.C_SIZE + 1, prjY + 7, this.textValue.toFixed(1), "14", "white");
+                          
+                        if (this.size !== config.stockIndicator.C_SIZE) {
+                            color = config.stockIndicator.C_SMALL_COLOR;
+                        }
+
+                        drawLine(prjX - 3, prjY - config.stockIndicator.C_GAP - this.size, prjX + 3, prjY - config.stockIndicator.C_GAP - this.size, color);
+                        drawLine(prjX, prjY - config.stockIndicator.C_GAP, prjX, prjY - config.stockIndicator.C_GAP - this.size, color);
+                        drawLine(prjX, prjY + config.stockIndicator.C_GAP, prjX, prjY + config.stockIndicator.C_GAP + this.size, color);
+                        drawLine(prjX - 3, prjY + config.stockIndicator.C_GAP + this.size, prjX + 3, prjY + config.stockIndicator.C_GAP + this.size, color);
+                    }
+                }
+
+                this.getMiddleSizeIfStockItemIsThin = function() {
+                    if (this.isExtraWeek === true) {
+                        return this.size = config.stockIndicator.C_SIZE >> 1;
+                    }
+                    else
+                    {
+                        return this.size = config.stockIndicator.C_SIZE;
+                    }
+                }
+
+                // Keep offset Y from tunnel class, the idea is that position Y of stock indicator
+                // is not the same value as stock value showed.
+                this.setTunnelCenterOffsetY = function(_tunnelOffsetY) {
+                    this.tunnelOffsetY = _tunnelOffsetY
+                }
+
+                this.update = function(_stockValue, _isExtraWeek) {
+                    this.stockValue = _stockValue;
+                    this.isExtraWeek = _isExtraWeek;
+                }
+            }
+
+            function PSV(_value, _openingSpace) {
+                this.value = _value;
+                this.openingSpace = _openingSpace;
+                this.isPartOfAnExtraweek = false;
+            }
+
+            // Monthly cycle description: it has 7 weeks, the first 4 weeks take values from stock array (if possible), 
+            // the last 3 weeks (extra weeks) take values randomly generated starting from last value and ending with 
+            // the next real stock value and so on.
+            //
+            //                           WEEK 1       WEEK 2        WEEK 3        WEEK 4     EXTRA WEEK S  EXTRA WEEK M  EXTRA WEEK E   WEEK N                         
+            //                       /-----------\ /-----------\ /-----------\ /-----------\ /-----------\ /-----------\ /-----------\ /-....
+            //                       0123456789ABC 0123456789ABC 0123456789ABC 0123456789ABC 0123456789ABC 0123456789ABC 0123456789ABC 01.... 
+            // pusherIndex (0 to 11):+             |                                                             |                                  |
+            // inc week (0 to 6)     :-------------+                                                             |                     |
+            // inc month (0 to 11)   :---------------------------------------------------------------------------|---------------------+
+            // inc year (each 12 months)                                                                         |
+            // inc array index (on week increment) *             *             * .....                           |
+            // NOTE: if no more stock values, start to generate them randomly.                                   |
+            // Here we trigger a new month update in score banner. ----------------------------------------------+
+            function MonthlyCycle() {
+                this.pusherIndex = 0;
+                this.week = 0;
+                this.month = 0,
+                this.year = config.tunnel.C_STARTING_YEAR;
+                this.stockIndex = 0;
+
+                this.reset = function() {
+                    this.pusherIndex = 0;
+                    this.week = 0;
+                    this.month = 0,
+                    this.year = config.tunnel.C_STARTING_YEAR;
+                    this.stockIndex = 0;
+                }
+
+                this.toString = function() {
+                    return (
+                        "P:" + this.pusherIndex + ", " +  
+                        "W:" + this.week + ", " +  
+                        "M:" + this.month + ", " +  
+                        "Y:" + this.year + ", " +  
+                        "A:" + this.stockIndex + ", " +
+                        "SY:" + this.getScoreYear() + ", " +
+                        "SM:" + this.getScoreMonth());
+                }
+
+                this.incrementPusherIndex = function() {
+                    this.pusherIndex++;
+
+                    if (this.pusherIndex >= config.general.WANTED_PUSHERS_PER_WIDTH) {
+                        this.pusherIndex = 0;
+                    }
+                }
+
+                this.incrementWeek = function() {
+                    this.week++;
+
+                    if (this.week > 6) {
+                        this.week = 0;
+                        this.incrementMonth();
+                    }
+
+                    this.incrementstockIndex();
+                }
+
+                this.isWeekStock = function() {return this.week <= 3;}
+                this.isWeekBonus = function() {
+                    // Bonus is visible when: 
+                    // a) week one of month three of the first year, the idea is to show the user this mechanic.
+                    // b) week one of month greater or equal to two and some probability, the idea is to avoid always show a bonus. 
+                    return  (this.week === 1 && this.month === 2 && this.year === config.tunnel.C_STARTING_YEAR) ||
+                            (this.week === 1 && this.month >= 2 && random(100) > 100 * config.bonus.BONUS_PROBABILITY);
+                }
+                this.isExtraWeekStart = function() {return this.week === 4;}
+                this.isExtraWeekMiddle = function() {return this.week === 5;}
+                this.isExtraWeekOut = function() {return this.week === 6;}
+                this.isScoreWeek = function() {
+                    return  (this.week === 0 && (this.month > 0 || this.year > config.tunnel.C_STARTING_YEAR));
+                }
+
+                this.incrementstockIndex = function() {
+                    // Only move stock index if current week is not one of a random week.
+                    if (this.week <= 3) {
+                        this.stockIndex++;
+                    }
+                }
+
+                this.incrementMonth = function() {
+                    this.month++;
+
+                    this.modifyGameRulesValues();
+
+                    if (this.month >= 12) {
+                        this.month = 0;
+                        this.incrementYear();
+                    }
+                }
+
+                this.incrementYear = function() {
+                    this.year++;
+
+                    if (this.year > 2023) {
+                        console.log("A new hope.");
+                    }
+                    else if (this.year > 2024) {
+                        console.log("Greetings highlander.");
+                    }
+                }
+
+                this.getScoreMonth = function() {
+                    return this.month;
+                }
+
+                this.getScoreYear = function() {
+                    return this.year;
+                }
+
+                this.modifyGameRulesValues = function() {
+                    game.gameRules.openingSpace -= 2;
+                    if (game.gameRules.openingSpace < config.tunnel.C_MIN_OPENING_SPACE)
+                        game.gameRules.openingSpace = config.tunnel.C_MIN_OPENING_SPACE;
+                }
+            }
+
+            function Tunnel(_score) {
+                this.arrStockValue = [
+                    179,179,183,186,187,190,193,195,198,199,200,205,208,209,213,216,222,228,231,236,241,244,249,252,256,261,265,269,276,287,349,350,349,349,350,349,348,350,349,349,347,349,372,396,464,564,691,803,
+                    811,815,817,822,826,830,835,837,842,845,850,850,860,864,870,876,878,882,882,889,894,904,900,904,911,917,924,928,932,936,937,938,955,959,961,965,976,973,978,984,989,999,997,1004,1012,1016,1018,1028,
+                    1032,1036,1041,1045,1053,1059,1054,1059,1063,1065,1064,1062,1081,1074,1138,1164,1175,1112,1142,1134,1180,1179,1164,1188,1239,1261,1286,1271,1354,1325,1298,1317,1332,1364,1450,1476,1335,1424,1421,1455,1489,1438,1405,1407,1450,1433,1440,1449,1449
+                ];
+
+                this.monthlyCycle = new MonthlyCycle();
+
+                this.centerOffsetY = 0;
+                // Amount of desplacement out of the left margin, if it gets the width of a pusher
+                // then we need to remove from pusher's array.
+                this.scrollLeftCounter = 0;
+                this.arrPushers = [];     
+
+                this.depScore = _score;
+                this.depStockIndicator = new StockIndicator();
+                
+                this.depBonus = new Bonus(); 
+                // Those variables are part of the logic that avoids change the opening 
+                // space in the middle of extra weeks. The idea is that when it is the 
+                // right moment the applied variable takes the pending value variable.
+                this.appliedExtraOpeningSpace = 0;
+                this.pendingExtraOpeningSpace = 0;
+
+                this.reset = function() {
+                    this.depBonus.reset();
+                    this.appliedExtraOpeningSpace = 0;
+                    this.pendingExtraOpeningSpace = 0;
+
+                    this.monthlyCycle.reset();
+
+                    this.scrollLeftCounter = 0;
+                    this.arrPushers = [];
+
+                    this.startStockValue = this.arrStockValue[0];
+                    this.endStockValue = this.arrStockValue[1];
+                    this.monthlyCycle.stockIndex = 1;                     
+
+                    // Move some vertical offset to make the center of the tunnel be the middle 
+                    // of the screen (320px), this way, the first stock value (179) is located 
+                    // in the 320 y position.
+                    this.centerOffsetY = game.canvas.HALF_HEIGHT - this.getMinStockValuePossible();
+                    
+                    // Add the first two weeks to the projected stock values array. 
+                    this.addNewWeek();
+                    this.addNewWeek();
+                    
+                    // Update score with month and year.
+                    this.depScore.updateYearAndMonth(this.monthlyCycle.year, this.monthlyCycle.month);
+
+                    // Init stock indicator.
+                    this.depStockIndicator.reset();
+                    this.depStockIndicator.setTunnelCenterOffsetY(this.centerOffsetY);
+                    this.updateStockIndicator();
+                }
+
+                this.updateGameLogic = function () {
+                    this.scrollLeftCounter -= player.velocityX;
+
+                    //  If the most left pusher is out of the screen it is safe to remove.
+                    if (this.isLeftPusherOutsideTheScreen()) { 
+                        this.updateStockIndicator();
+                       
+                        this.increaseScoreWhenMonthMarkReached();
+
+                        this.scrollLeftCounter += config.pushers.WIDTH; 
+
+                        this.removePusher();
+                    }
+
+                    this.depStockIndicator.updateGameLogic();
+                    
+                    this.depBonus.x -= player.velocityX;
+                    this.depBonus.updateGameLogic();
+                }
+
+                this.render = function() {
+                    let item = null;
+                    let x = 0;
+                    let y = 0;
+
+                    for (let i = 0; i < this.arrPushers.length; i++) {
+                        item = this.arrPushers[i];
+                        x = this.scrollLeftCounter + (i * config.pushers.WIDTH) + (config.pushers.WIDTH >> 1);
+                        y = item.value - game.canvas.offsetY;
+
+                        // Pushers are green at normal weeks otherwise pushers are red.
+                        if (item.isPartOfAnExtraweek) {
+                            drawImageCentered(config.imgManager.PUSHER_TOP_RED, x, y + item.openingSpace);
+                            drawImageCentered(config.imgManager.PUSHER_BOTTOM_RED, x, y - item.openingSpace);
+                        }
+                        else {
+                            drawImageCentered(config.imgManager.PUSHER_TOP, x, y + item.openingSpace);
+                            drawImageCentered(config.imgManager.PUSHER_BOTTOM, x, y - item.openingSpace);
+                        }
+                    }
+
+                    this.depStockIndicator.render();
+                    this.depBonus.render();
+                }
+
+                this.setBonusSpace = function(_value) {
+                    this.pendingExtraOpeningSpace = _value;
+                }
+
+                this.isLeftPusherOutsideTheScreen = function() {
+                    return Math.abs(this.scrollLeftCounter) > config.pushers.WIDTH;
+                }
+
+                this.updateStockIndicator = function() {
+                    let pusher = this.getRightScreenPusher();
+                    this.depStockIndicator.update(pusher.value, pusher.isPartOfAnExtraweek);
+                }
+
+                this.increaseScoreWhenMonthMarkReached = function() {
+                    if (this.monthlyCycle.isScoreWeek() &&  
+                        this.monthlyCycle.pusherIndex === config.tunnel.C_PUSHER_INDEX_TO_GET_BONUS - 3) {
+                        this.depScore.updateYearAndMonth(this.monthlyCycle.getScoreYear(), this.monthlyCycle.getScoreMonth());
+                        this.depScore.playScoreSound();
+                    }
+                }
+
+                this.removePusher = function() {
+                    this.arrPushers.splice(0, 1); 
+
+                    this.monthlyCycle.incrementPusherIndex(); 
+                    
+                    // If all pushers in a week were removed then add a new week to the projected stock values.
+                    if (this.monthlyCycle.pusherIndex === 0) 
+                    {
+                        this.addNewWeek();
+                    }
+                }
+
+                // Adding a new week implies take in account if we are in some random week
+                // and if not the case if we hace some stock value left. 
+                // Finally, if no more stock values left we grab one fron the random generator.
+                this.addNewWeek = function () {
+                    if (this.monthlyCycle.isWeekStock()) {
+                        this.addNormalWeekTunnelSection();
+                    }
+                    else
+                    {
+                        this.addExtraWeekTunnelSection();
+                    }
+                }
+
+                this.addNormalWeekTunnelSection = function() {
+                    this.addPushersToTunnelSection(this.startStockValue, this.endStockValue);
+            
+                    if (this.monthlyCycle.isWeekBonus()) {
+                        let pushersAhead = 18;  
+                        this.depBonus.setEnabled(
+                            config.pushers.WIDTH * pushersAhead, 
+                            this.arrPushers[pushersAhead].value);
+                    }
+
+                    this.monthlyCycle.incrementWeek();
+                        
+                    this.startStockValue = this.endStockValue;
+                    this.endStockValue = this.getNewStockValueOrRandomIfEmpty();    
+                }
+
+                this.addExtraWeekTunnelSection = function() {
+                    let startValue = 0;
+                    let endValue = 0;
+
+                    if (this.monthlyCycle.isExtraWeekStart()) {
+                        // Just before start a new extra week we update opening space to be used
+                        // this avoid to break opening space in the middle of the extra week.
+                        this.appliedExtraOpeningSpace = this.pendingExtraOpeningSpace;
+
+                        this.startStockValue = this.getCurrentStockValue();
+                        this.endStockValue = this.generateRandomStockValueFromLastAdded(this.startStockValue);
+                    }
+                    else if (this.monthlyCycle.isExtraWeekMiddle()) {
+                        this.startStockValue = this.getCurrentStockValue();
+                        this.endStockValue = this.getCurrentStockValue();
+                    }
+                    else if (this.monthlyCycle.isExtraWeekOut()) {
+                        this.startStockValue = this.getCurrentStockValue();
+                        this.endStockValue = this.getNewStockValueOrRandomIfEmpty();
+                    }
+
+                    this.addPushersToTunnelSection(this.startStockValue, this.endStockValue);
+                    this.modifyOpeningSpace();
+
+                    this.startStockValue = this.endStockValue;
+                    this.monthlyCycle.incrementWeek();
+                }
+
+                this.addPushersToTunnelSection = function(_valueFrom, _valueTo) {
+                    let initialValue = _valueFrom + this.centerOffsetY;
+                    let finalValue = _valueTo + this.centerOffsetY;
+                    let delta = (finalValue - initialValue) / config.tunnel.C_INTERPOLATION_STEPS;
+
+                    for (let i = 0; i < config.tunnel.C_INTERPOLATION_STEPS; i++) {
+                        let psv = new PSV(initialValue + (delta * i), config.tunnel.C_MAX_OPENING_SPACE); 
+                        this.arrPushers.push(psv);
+                    }
+                }
+
+                // Make an interpolation from values max to min in the pushers
+                // EXTRA WEEK START | EXTRA WEEK MIDDLE | EXTRA WEEK END |   
+                // -----                                           -----
+                //      -----                                 -----
+                //           -----    -----------------  -----
+                // 
+                //           -----    -----------------  -----
+                //      -----                                 -----
+                // -----                                           -----
+                //
+                this.modifyOpeningSpace = function() {
+                    let startValue = 0;
+                    let endValue = 0;
+                    let reduceMiddlePusher = 0;
+
+                    if (this.monthlyCycle.isExtraWeekStart()) {
+                        startValue = config.tunnel.C_MAX_OPENING_SPACE;
+                        endValue = game.gameRules.openingSpace + this.appliedExtraOpeningSpace;
+                    }
+                    else if (this.monthlyCycle.isExtraWeekMiddle()) {
+                        startValue = game.gameRules.openingSpace + this.appliedExtraOpeningSpace;
+                        endValue = game.gameRules.openingSpace + this.appliedExtraOpeningSpace;
+                        
+                        reduceMiddlePusher = config.pushers.HEIGHT >> 1;
+                    }
+                    else if (this.monthlyCycle.isExtraWeekOut()) {
+                        startValue = game.gameRules.openingSpace + this.appliedExtraOpeningSpace;
+                        endValue = config.tunnel.C_MAX_OPENING_SPACE;
+                    }
+
+                    let delta = (endValue - startValue) / config.tunnel.C_INTERPOLATION_STEPS;
+                    let startIndex = (this.arrPushers.length - config.tunnel.C_INTERPOLATION_STEPS); 
+
+                    for (let i = 0; i < config.tunnel.C_INTERPOLATION_STEPS; i++) {
+                        this.arrPushers[startIndex + i].openingSpace = startValue + (delta * i);
+                        this.arrPushers[startIndex + i].isPartOfAnExtraweek = true;                        
+                    }
+
+                    let middleIndex = startIndex + config.tunnel.C_PUSHER_INDEX_TO_GET_BONUS;
+                    this.arrPushers[middleIndex].openingSpace = this.arrPushers[middleIndex].openingSpace - reduceMiddlePusher;  
+                    this.arrPushers[middleIndex - 1].openingSpace = this.arrPushers[middleIndex - 1].openingSpace - reduceMiddlePusher;  
+                }
+
+                this.getCurrentStockValue = function() {
+                    return this.startStockValue;
+                }
+
+                this.getNewStockValueOrRandomIfEmpty = function() {
+                    if (this.monthlyCycle.stockIndex < this.arrStockValue.length) {
+                        return this.arrStockValue[this.monthlyCycle.stockIndex];
+                    }
+                    else {
+                        return this.generateRandomStockValueFromLastAdded(this.getCurrentStockValue());    
+                    }
+                }
+
+                // If no more stock values stock table, create a new random value.
+                this.generateRandomStockValueFromLastAdded = function(_lastStockValue) {                    
+                    let randomValue = randomWithNegative(config.tunnel.C_RANDOM_OPENING);
+
+                    // Avoid a random number lower that bottom limit.
+                    if (_lastStockValue + randomValue < this.getMinStockValuePossible()) {
+                        randomValue *= -1;
+                    }
+
+                    return _lastStockValue + randomValue;
+                }
+
+                this.getMinStockValuePossible = function() {
+                    return this.arrStockValue[0];
+                }
+
+                this.getRightScreenPusher = function() {
+                    return this.getPusherAtindex(config.general.WANTED_PUSHERS_PER_WIDTH);
+                }
+
+                this.getPusherValueAtIndex = function(_index) {
+                    return this.getPusherAtindex(_index).value;  
+                }
+
+                this.getPusherAtindex = function(_index) {
+                    return this.arrPushers[_index];  
+                }
+
+                this.getPusherTopPositionY = function(_index) {
+                    return this.getPusherValueAtIndex(_index) + this.arrPushers[_index].openingSpace;  
+                }
+
+                this.getPusherBottomPositionY = function(_index) {
+                    return this.getPusherValueAtIndex(_index) - this.arrPushers[_index].openingSpace;  
+                }
+
+                this.checkBonusCollision = function(_playerRect) {
+                    return this.depBonus.isEnabled() && detectCollision(_playerRect, this.depBonus.getRect());
+                }
+
+                this.setBonusDisabled = function() {
+                    this.depBonus.setDisabled();
+                }
+            }
+
+            function Explode(_size) {
+                this.animCurrentFrame = 0;
+                this.animCounter = 0;
+                this.animSpeed = config.explode.C_ANIM_SPEED;
+                this.size = _size;
+
+                this.x = 0;
+                this.y = 0;
+
+                this.reset = function(_x, _y) {
+                    this.animCurrentFrame = 0;
+                    this.animCounter = 0;
+                    this.animSpeed = config.explode.C_ANIM_SPEED;
+
+                    this.x = _x;
+                    this.y = _y;
+                }
+
+                this.updateGameLogic = function() {
+                    if (this.animCounter !== -1) {
+                        this.updateAnimation();
+                    }
+                }
+
+                this.updateAnimation = function() {
+                    this.animCounter++;
+                    if (this.animCounter > this.animSpeed) {
+                        this.animCounter = 0;
+
+                        this.animCurrentFrame++;
+                        if (this.animCurrentFrame > config.explode.C_MAX_FRAMES - 1) {
+                            this.animCurrentFrame = 0;
+                            this.animCounter = -1;
+                        }
+                    }
+                }
+
+                this.render = function() {
+                    if (this.animCounter !== -1) {
+                        drawImageCenteredClip(config.imgManager.EXPLODE, config.explode.C_FRAME_SIZE * this.animCurrentFrame, 0, config.explode.C_FRAME_SIZE, config.explode.C_FRAME_SIZE - 1, this.x, this.y, this.size, this.size);                    
+                    }
+                }
+            }
+
+            function Player(_tunnel) {                
+                this.x = 0;
+                this.y = 0;
+                this.collisionRect;
+
+                this.velocityX = config.player.C_VELOCITY;
+                this.gravity = 0.2;
+                this.velocityY = 0;
+
+                this.wingAnimFrame = 0;
+                this.wingAnimCounter = 0;
+                this.wingAnimSpeed = config.player.C_ANIM_SPEED;
+                this.burntAnimFrame = 0;
+                
+                this.diying = false;
+
+                this.explode = new Explode(config.explode.C_RENDER_SIZE);
+
+                this.depTunnel = _tunnel;
+
+                this.tail = new Tail();
+
+                this.reset = function() {
+                    this.x = config.pushers.WIDTH * config.player.C_PLAYER_LEFT_MARGIN;
+                    this.y = this.depTunnel.getPusherValueAtIndex(0);
+                    this.collisionRect = {
+                        x: 0, 
+                        y: 0, 
+                        width: getImage(config.imgManager.PLAYER).width,
+                        height: getImage(config.imgManager.PLAYER).height};
+
+                    this.velocityX = config.player.C_VELOCITY;
+                    this.velocityY = 0;
+
+                    this.wingAnimFrame = config.imgManager.PLAYER;
+                    this.burntAnimFrame = config.imgManager.PLAYER;
+                    this.wingAnimCounter = 0;
+                    this.wingAnimSpeed = config.player.C_ANIM_SPEED;
+
+                    this.died = false;
+
+                    this.explode.reset(this.x, this.y);
+                    this.tail.reset(this.y);
+
+                    this.increaseOpeningSpace();
+                }
+
+                this.processInputs = function() {
+                    if (!isState(game.state.C_STATE_PLAYER_DYING)) {
+                        this.jump();
+                    }
+                }
+
+                this.updateGameLogic = function() {
+                    if (this.died) {   
+                        this.explode.updateGameLogic();
+                        this.tail.updateGameLogic();
+
+                        if (this.explode.animCounter === -1) {
+                            navigateTo(game.navigation.C_SCREEN_GAME_OVER);
+                        }
+                    }
+                    else {
+                        this.updateVerticalScrollAndGravityLogic();
+                        this.updateWingAnimation();
+                        this.updateTailLogic();
+
+                        this.died = this.checkBandsCollision();
+
+                        if (this.died) {
+                            this.tail.startDyingAnimation();
+                        }
+                        else
+                        {
+                            if (this.askTunnelToCheckBonusCollision()) {
+                                this.depTunnel.setBonusDisabled();
+                                this.tail.setEnabled(this.y);
+                            }
+                        }
+
+                    }
+                }
+
+                this.render = function() {
+                    if (this.died) {  
+                        if (this.velocityY > config.player.C_SHOW_UP_FRAME_WHEN_VELOCITY && this.velocityY < 0) {
+                            drawImageCentered(config.imgManager.PLAYER_UP_BURNT, this.x, this.y);
+                        }
+                        else if (this.velocityY > config.player.C_SHOW_DOWN_FRAME_WHEN_VELOCITY  ) {
+                            drawImageCentered(config.imgManager.PLAYER_DOWN_BURNT, this.x, this.y);
+                        }
+                        else {
+                            drawImageCentered(this.burntAnimFrame, this.x, this.y);
+                        }
+                        this.explode.render();
+                    }
+                    else
+                    {
+                        if (this.velocityY > config.player.C_SHOW_UP_FRAME_WHEN_VELOCITY && this.velocityY < 0) {
+                            drawImageCentered(config.imgManager.PLAYER_UP, this.x, this.y);
+                        }
+                        else if (this.velocityY > config.player.C_SHOW_DOWN_FRAME_WHEN_VELOCITY  ) {
+                            drawImageCentered(config.imgManager.PLAYER_DOWN, this.x, this.y);
+                        }
+                        else {
+                            drawImageCentered(this.wingAnimFrame, this.x, this.y);
+                        }
+                    }
+
+                    this.tail.render();
+                    drawCollisionRectangle(this.getRect());
+                }
+
+                this.setFlyingVelocity = function() {
+                    this.wingAnimSpeed = config.player.C_ANIM_SPEED;
+                }
+
+                this.updateVerticalScrollAndGravityLogic = function() {
+                    this.velocityY += this.gravity;
+                    this.velocityY = this.velocityY;
+
+                    this.y -= this.velocityY;
+                    this.y = Math.max(this.y, 0);
+
+                    // Scroll
+                    if (this.y > game.canvas.HEIGHT * .75) {
+                        game.canvas.offsetY -= this.velocityY ;
+                        this.y += this.velocityY;
+                    }
+
+                    if (game.canvas.offsetY > 0 && 
+                        this.y < game.canvas.HEIGHT * .25) {
+                        game.canvas.offsetY -= this.velocityY ;
+                        this.y += this.velocityY;
+                    }
+
+                    game.canvas.offsetY = Math.max(game.canvas.offsetY, 0);
+                }
+
+                this.updateWingAnimation = function() {
+                    this.wingAnimCounter++;
+                    if (this.wingAnimCounter > this.wingAnimSpeed) {
+                        this.wingAnimCounter = 0;
+
+                        // Change wing animation frame.
+                        if (this.wingAnimFrame === config.imgManager.PLAYER) {
+                            this.wingAnimFrame = config.imgManager.PLAYER_1;
+                            this.burntAnimFrame = config.imgManager.PLAYER_1_BURNT;
+                        }
+                        else
+                        {
+                            this.wingAnimFrame = config.imgManager.PLAYER;
+                            this.burntAnimFrame = config.imgManager.PLAYER_BURNT;
+                        }
+                    }
+                }
+
+                this.updateTailLogic = function() {
+                    this.tail.newTarget(this.y);
+                    this.tail.updateGameLogic();
+                    this.increaseOpeningSpace();
+                }
+
+                this.increaseOpeningSpace = function() {
+                    this.tail.isEnabled() ? this.depTunnel.setBonusSpace(config.tail.C_EXTRA_OPENING_SPACE) : this.depTunnel.setBonusSpace(0);
+                }
+
+                this.checkBandsCollision = function() {
+                    return game.debug.CHECK_COLLISIONS && (this.y < 0 || 
+                        this.y < this.depTunnel.getPusherBottomPositionY(2) + config.pushers.HEIGHT - game.canvas.offsetY ||
+                        this.y > this.depTunnel.getPusherTopPositionY(2) - config.pushers.HEIGHT - game.canvas.offsetY);
+                }
+
+                this.askTunnelToCheckBonusCollision = function() {
+                    return this.depTunnel.checkBonusCollision(this.getRect());
+                }
+
+                this.isChallengeOvercome = function() {
+                    return this.y < 0 || 
+                        this.y < this.depTunnel.getPusherBottomPositionY(2) - game.canvas.offsetY ||
+                        this.y > this.depTunnel.getPusherTopPositionY(2) - game.canvas.offsetY;
+                }
+
+                this.startDyingAnimation = function() {
+                    this.explode.x = this.x;  
+                    this.explode.y = this.y;
+
+                    playSound(config.sndManager.EXPLODE);
+                }
+
+                this.jump = function() {                    
+                    this.velocityY = -config.player.C_JUMP_FORCE;
+                    
+                    playSound(config.sndManager.JUMP);
+                }
+
+                this.getRect = function() {
+                    this.collisionRect.x = this.x - (this.collisionRect.width >> 1); 
+                    this.collisionRect.y = this.y + (this.collisionRect.height >> 1); 
+                    return this.collisionRect;
+                }
+            }
+
+            function Score() {
+                this.x = 0;
+                this.y = 0;
+                this.imageRibbon;
+
+                this.interceptor = new Interceptor(config.general.C_GLUE_FORCE);
+
+                this.currentMonth = 0;
+                this.currentYear = 0;
+ 
+                this.reset = function() {
+                    this.interceptor.reset();
+                    this.x = game.canvas.HALF_WIDTH;
+                    this.startFadeIn();
+                    this.y = this.interceptor.getCurrent();
+
+                    this.currentMonth = 0;
+                    this.currentYear = 0;
+                }
+
+                this.updateGameLogic = function() {
+                    this.interceptor.updateGameLogic();
+                    this.y = this.interceptor.getCurrent();
+                }
+
+                this.render = function() {
+                    drawImageCentered(config.imgManager.BANNER, this.x, this.y);
+                    drawImageCentered(config.imgManager.FLAG_RIBBON, this.x, this.y + 40);
+
+                    let text = "M=" + this.getMonth() + " Y=" + this.getYear();
+                    printTextXCentered(text, this.x, this.y - 35, 0.7);
+                }
+
+                this.updateYearAndMonth = function(_year, _month) {
+                    this.currentMonth = _month + 1;
+                    this.currentYear = _year;
+                }
+
+                this.playScoreSound = function() {
+                    playSound(config.sndManager.POINT);
+                }
+
+                this.getYear = function() {
+                    return this.currentYear;
+                }
+
+                this.getMonth = function() {
+                    return this.currentMonth;
+                }
+
+                this.startFadeIn = function() {  
+                    this.interceptor.set(game.canvas.HEIGHT * 1.5, game.canvas.HEIGHT + 20);
+                }
+
+                this.startFadeOut = function() {
+                    this.interceptor.set(game.canvas.HEIGHT + 20, game.canvas.HEIGHT / 2);
+                }
+            }
+
+            function GameOverBanner(_score) {
+                this.x = 0;
+                this.y = 0;
+
+                this.depScore = _score;
+                this.interceptor = new Interceptor(config.general.C_GLUE_FORCE);
+
+                this.reset = function() {
+                    this.interceptor.reset();
+                    this.x = game.canvas.HALF_WIDTH;
+                    this.startFadeIn();
+                    this.y = this.interceptor.getCurrent();
+                }
+
+                this.updateGameLogic = function() {
+                    this.interceptor.updateGameLogic();
+                    this.y = this.interceptor.getCurrent();
+                }
+
+                this.render = function() {
+                    drawImageCentered(config.imgManager.BANNER, this.x, this.y);
+                    drawImageCentered(config.imgManager.GAMEOVER_TEXT, this.x, this.y);
+                    drawImageCentered(config.imgManager.RED_RIBBON, this.x, this.y + 40);
+
+                    let text = "M=" + this.depScore.getMonth() + " Y=" + this.depScore.getYear();
+                    printTextXCentered(text, this.x, this.y - 35, 0.7);
+                }
+
+                this.startFadeIn = function() {
+                    this.interceptor.set(config.gameOverBanner.C_START_POSITION, config.gameOverBanner.C_MIDDLE_POSITION);
+                }
+
+                this.startFadeOut = function() {
+                    this.interceptor.set(config.gameOverBanner.C_MIDDLE_POSITION, config.gameOverBanner.C_END_POSITION);
+                }
+                
+                this.middlePositionReached = function() {
+                    return this.interceptor.getCurrent() === config.gameOverBanner.C_MIDDLE_POSITION;
+                }
+
+                this.endPositionReached = function() {
+                    return this.interceptor.getCurrent() === config.gameOverBanner.C_END_POSITION;
+                }
+            }
+
+            function FooterBar() {
+                this.iconSoundPosX = 0;
+                this.iconSoundPosY = 0;
+
+                this.imageIconCreditsPosX = 0;
+                this.imageIconCreditsPosY = 0;
+
+                this.reset = function() {
+                    this.iconSoundPosX = game.canvas.HALF_WIDTH - config.footerBar.C_GAP_SIZE,
+                    this.iconSoundPosY = config.footerBar.C_OFFSET_Y;
+
+                    this.imageIconCreditsPosX = game.canvas.HALF_WIDTH + config.footerBar.C_GAP_SIZE,
+                    this.imageIconCreditsPosY = config.footerBar.C_OFFSET_Y;
+
+                    game.keyboard.keyButtonConfigSoundPressed = false;
+                    game.keyboard.keyButtonConfigSoundAwaitingRelease = false;
+                }
+
+                this.processInputs = function() {
+                    if (processButtonAction(game.keyboard.primaryButton)) { 
+                        if (this.checkSoundIconPressed()) {
+                            this.soundButtonAction();
+                        }
+                        else if (this.checkCreditsIconPressed()) {
+                            this.webButtonAction()
+                        }
+                        else {
+                            game.keyboard.primaryButton.pressed = true;
+                            game.keyboard.primaryButton.waitRelease = false;
+                        }
+                    }
+
+                    if (processButtonAction(game.keyboard.soundButton)) {
+                        this.soundButtonAction(); 
+                    }
+                        
+                    if (processButtonAction(game.keyboard.webButton)) {
+                        this.webButtonAction(); 
+                    }
+                }
+                
+                this.updateGameLogic = function() {
+                }
+
+                this.render = function() {
+                    if (game.sound.enabled) {
+                        drawImageCenteredWH(config.imgManager.SOUND_ON, this.iconSoundPosX, this.iconSoundPosY, config.footerBar.C_BUTTON_SIZE, config.footerBar.C_BUTTON_SIZE);                    
+                    }
+                    else
+                    {
+                        drawImageCenteredWH(config.imgManager.SOUND_OFF, this.iconSoundPosX, this.iconSoundPosY, config.footerBar.C_BUTTON_SIZE, config.footerBar.C_BUTTON_SIZE);                    
+                    }
+                    
+                    drawImageCenteredWH(config.imgManager.CREDITS, this.imageIconCreditsPosX, this.imageIconCreditsPosY, config.footerBar.C_BUTTON_SIZE, config.footerBar.C_BUTTON_SIZE);                    
+                }
+
+                this.checkSoundIconPressed = function() {
+                    return detectCircleCollision(this.iconSoundPosX, this.iconSoundPosY,  
+                                                    game.mouse.offsetX, game.mouse.offsetY,
+                                                    config.footerBar.C_BUTTON_SIZE >> 1);
+                }
+
+                this.checkCreditsIconPressed = function() {
+                    return detectCircleCollision(this.imageIconCreditsPosX, this.imageIconCreditsPosY,  
+                                                    game.mouse.offsetX, game.mouse.offsetY,
+                                                    config.footerBar.C_BUTTON_SIZE >> 1);
+                }
+
+                this.soundButtonAction = function() {                    
+                    if (game.sound.enabled === true) {
+                        playSound(config.sndManager.SOUND_OFF);
+                        game.sound.enabled = false;
+                    }
+                    else
+                    {
+                        game.sound.enabled = true;
+                        playSound(config.sndManager.SOUND_ON);
+                    }
+                }
+
+                this.webButtonAction = function() {
+                    window.open(config.footerBar.C_TWITTX_URL, "_blank");
+                }
+            }
+
+            // ***** Minimal-framework *****
+ 
+            // Initialization
+            function setupGraphicContext() {
+                CANVAS = document.getElementById("CANVAS");
+                CANVAS.height = game.canvas.HEIGHT;
+                CANVAS.width = game.canvas.WIDTH;
+                context = CANVAS.getContext("2d");
+            }
+
+            function setupKeyboardEvents() {
+                document.addEventListener("keyup", processKeyUp);
+                document.addEventListener("keydown", processKeyDown);
+                document.addEventListener("mouseup", processMouseUp);
+                document.addEventListener("mousedown", processMouseDown);
+            }
+
+            function loadResources() {
+                const imageCollection = config.imgManager;
+                config.general.C_RESOURCES_TO_BE_LOADED += Object.keys(imageCollection).length;
+
+                const soundCollection = config.sndManager;
+                config.general.C_RESOURCES_TO_BE_LOADED += Object.keys(soundCollection).length;
+
+                loadImages(imageCollection);
+                loadSounds(soundCollection);
+            }
+
+            function loadImages(_imageCollection) {
+                redBall = new Image();
+                redBall.src = redBallData;
+
+                for (const key in _imageCollection) {
+                    let descriptor = Object.getOwnPropertyDescriptor(_imageCollection, key).value;
+                    const imageData = createImageAndLoad(descriptor.filename);
+                    game.imgManager.push(imageData);
+                    descriptor.index = game.imgManager.length - 1;
+                }
+            }
+
+            function loadSounds(_soundCollection) {
+                for (const key in _soundCollection) {
+                    let descriptor = Object.getOwnPropertyDescriptor(_soundCollection, key).value;
+                    const soundData = createSoundAndLoad(descriptor.filename);
+                    game.sndManager.push(soundData);
+                    descriptor.index = game.sndManager.length - 1;
+                }
+            }
+
+            function getImage(_imageElement) {
+                return game.imgManager[_imageElement.index];
+            }
+
+            function waitForAllTheResourcesToBeLoaded() {
+                if (game.loop.allResourcesLoaded) 
+                    return;
+
+                context.clearRect(0, 0, CANVAS.width, CANVAS.height);
+
+                drawResourcesLoadedPercentage();
+
+                if (game.loop.resourcesLoadedCounter === config.general.C_RESOURCES_TO_BE_LOADED) {
+                    game.loop.allResourcesLoaded = true;
+
+                    navigateTo(game.navigation.C_SCREEN_MENU);
+
+                    requestAnimationFrame(gameLoop);
+                }
+                else {
+                    requestAnimationFrame(waitForAllTheResourcesToBeLoaded);
+                }
+            }
+
+            function incrementResourceCounter() {
+                game.loop.resourcesLoadedCounter++;
+            }
+
+            function drawResourcesLoadedPercentage() {
+                let maxBalls = 15;
+                let resourcesLoadedPercentage =  game.loop.resourcesLoadedCounter / config.general.C_RESOURCES_TO_BE_LOADED;
+                let progress = maxBalls * resourcesLoadedPercentage;
+
+                let size = 0;
+                for (let index = 1; index < maxBalls; index++) {
+                    size = (maxBalls - index); 
+                    drawImageCenteredBase(redBall, game.canvas.HALF_WIDTH - (index * maxBalls), game.canvas.HALF_HEIGHT, size, size);
+                    drawImageCenteredBase(redBall, game.canvas.HALF_WIDTH + (index * maxBalls), game.canvas.HALF_HEIGHT, size, size);
+                }
+                drawImageCenteredBase(redBall, game.canvas.HALF_WIDTH, game.canvas.HALF_HEIGHT, 10, 10);
+            }
+
+            // Inputs
+            function processKeyDown(e) {
+                if (compareIgnoreCase(e.key, game.keyboard.primaryButton.key1) ||
+                    compareIgnoreCase(e.key, game.keyboard.primaryButton.key2)) {
+                    game.keyboard.primaryButton.pressed = true;
+                }
+
+                if (compareIgnoreCase(e.key, game.keyboard.soundButton.key1)) {
+                    game.keyboard.soundButton.pressed = true;
+                }
+
+                if (compareIgnoreCase(e.key, game.keyboard.webButton.key1)) {
+                    game.keyboard.webButton.pressed = true;
+                }
+ 
+                /*
+                if (e.key === "ArrowDown") {
+                    game.debug.enabled = !game.debug.enabled;
+                }*/
+            }
+
+            function processKeyUp(e) {
+                if (compareIgnoreCase(e.key, game.keyboard.primaryButton.key1) ||
+                    compareIgnoreCase(e.key, game.keyboard.primaryButton.key2)) {
+                    game.keyboard.primaryButton.pressed = false ;
+                }
+                
+                if (compareIgnoreCase(e.key, game.keyboard.soundButton.key1)) {
+                    game.keyboard.soundButton.pressed = false;
+                }
+
+                if (compareIgnoreCase(e.key, game.keyboard.webButton.key1)) {
+                    game.keyboard.webButton.pressed = false;
+                }
+            }
+
+            function processMouseDown(e) {
+                game.keyboard.primaryButton.pressed = true;
+
+                game.mouse.offsetX = e.offsetX;
+                game.mouse.offsetY = game.canvas.HEIGHT - e.offsetY;
+            }
+
+            function processMouseUp(e) {
+                game.keyboard.primaryButton.pressed = false;
+
+                game.mouse.offsetX = -1;
+                game.mouse.offsetY = -1;
+            }
+
+            // Navigation and state machine
+            function navigateTo(_screen) {
+                game.navigation.currentScreen = _screen;
+
+                if (game.navigation.currentScreen === game.navigation.C_SCREEN_MENU) {
+                    screenMenu_init();
+                }
+                else if (game.navigation.currentScreen === game.navigation.C_SCREEN_PLAYING) {
+                    screenPlaying_init();
+                }
+                else if (game.navigation.currentScreen === game.navigation.C_SCREEN_GAME_OVER) {
+                    screenGameOver_init();
+                }
+            }
+
+            function setState(_state) {
+                game.state.currentState = _state;
+            }
+
+            function isState(_state) {
+                return game.state.currentState === _state;
+            }
+
+            // Render text
+            function printTextXCentered(_text, _x, _y, _size)
+            {
+                let centeredX = _x - ((_text.length * game.ux.font.width * _size) >> 1);
+                printText(_text, centeredX, _y, _size);
+            }
+
+            function printText(_text, _x, _y, _size)
+            {
+                for (let i = 0; i < _text.length; i++) {
+                    let foundIndex = game.ux.font.C_KEY_MAP.indexOf(_text[i]);
+
+                    if (foundIndex !== -1) {
+                        context.drawImage(
+                            getImage(config.imgManager.FONT),
+                            2 + (foundIndex * game.ux.font.width),
+                            0,
+                            game.ux.font.width - 3,
+                            game.ux.font.height,
+                            _x + (i * game.ux.font.width * _size),
+                            game.canvas.HEIGHT - _y - (game.ux.font.height * _size >> 1),
+                            game.ux.font.width * _size,
+                            game.ux.font.height * _size
+                        );         
+                    }
+                }
+            }
+
+            // Collisions
+            function detectCollision(a, b) {
+                return a.x < b.x + b.width &&   
+                    a.x + a.width > b.x &&   
+                    a.y < b.y + b.height &&  
+                    a.y + a.height > b.y;    
+            }
+
+            function detectCircleCollision(_x1, _y1, _x2, _y2, _diameter) {
+                let dx = (_x2 - _x1);
+                let dy = (_y2 - _y1);
+
+                return Math.sqrt(dx * dx + dy * dy) <= _diameter;   
+            }
+
+            function drawCollisionRectangle(_rect) {
+                if (game.debug.SHOW_COLLISION_RECTANGLES) {
+                    drawRectangle(_rect.x, game.canvas.HEIGHT - _rect.y, _rect.width, _rect.height, "red");
+                }
+            }
+            
+            // Buttons
+            function processButtonAction(_buttonDef) {
+                if (_buttonDef.pressed === true && _buttonDef.waitRelease === false) {
+                    _buttonDef.waitRelease = true;
+                    return true;
+                }
+
+                if (_buttonDef.pressed === false && _buttonDef.waitRelease === true) 
+                {
+                    _buttonDef.waitRelease = false; 
+                }
+
+                return false;
+            }
+
+            // Strings
+            function compareIgnoreCase(_stringA, _stringB) {
+                return _stringA.toUpperCase() === _stringB.toUpperCase();
+            }
+
+            // Sound
+            function playSound(_soundElement) {
+                playSoundBase(game.sndManager[_soundElement.index]);
+            }
+
+            function playSoundBase(_snd) {
+                if (game.sound.enabled === true) {
+                    _snd.currentTime = 0;
+                    _snd.play();
+                }
+            }
+
+            function createSoundAndLoad(_filename) {
+                let newSound = new Audio();
+                _filename = game.project.soundsFolderPath + _filename;
+                newSound.src = _filename;
+                newSound.addEventListener('canplaythrough', incrementResourceCounter);
+                return newSound;
+            }
+
+            // Graphics
+            function createImageAndLoad(_filename) {
+                let newImage = new Image();
+                _filename = game.project.imagesFolderPath + _filename;
+                                
+                newImage.src = _filename;
+                newImage.onload = function() { incrementResourceCounter(); };
+                return newImage;
+            }
+
+            function drawDebugLine(_description, _value, _col, _row) {
+                context.fillStyle = "white";
+                context.font="16px sans-serif"; 
+
+                if (!isDefined(_value)) {
+                    context.fillText(_description, (_col - 1) * 8, game.debug.DEBUG_LINE_HEIGHT * _row);
+                }
+                else {
+                    context.fillText(_description + ": " + _value.toFixed(2), (_col - 1) * 8, game.debug.DEBUG_LINE_HEIGHT * _row);
+                }
+            }
+
+            function drawCircle(_x, _y, _radious, _fillColor) {
+                context.beginPath();
+                context.arc(_x, _y, _radious, 0, 2 * Math.PI); 
+                context.fillStyle = _fillColor
+                context.fill(); 
+            }
+
+            function drawText(_x, _y, _text, _size, _color) {
+                context.fillStyle = _color;
+                context.font= _size + "px sans-serif";
+                context.fillText(_text, _x, _y);
+            }
+
+            function drawLine(_x1, _y1, _x2, _y2, _color) {
+                context.beginPath();
+                context.moveTo(_x1, _y1);
+                context.lineTo(_x2, _y2);
+                context.strokeStyle = _color; 
+                context.lineWidth = 2;      
+                context.stroke();                       
+            }
+
+            function drawRectangle(_x1, _y1, _width, _height, _color) {
+                context.strokeStyle = _color; 
+                context.lineWidth = 2;       
+                context.strokeRect(_x1, _y1, _width, _height);
+            }
+
+            function drawImageCentered(_imageElement, _x, _y) {
+                drawImageCenteredWH(_imageElement, _x, _y,
+                    game.imgManager[_imageElement.index].width,
+                    game.imgManager[_imageElement.index].height);
+            }
+
+            function drawImageCenteredWH(_imageElement, _x, _y, _w, _h) {
+                drawImageCenteredBase(game.imgManager[_imageElement.index], _x, _y, _w, _h);
+            }
+
+            function drawImageCenteredBase(_image, _x, _y, _w, _h) {
+                if (!isDefined(_image)) 
+                    return;
+
+                let prjX = _x - (_w >> 1);
+                let prjY = game.canvas.HEIGHT - _y - (_h >> 1);
+                
+                context.drawImage(_image, prjX, prjY, _w, _h);
+            }
+            
+            function drawImageCenteredClip(_imageElement, _sx, _sy, _sw, _sh, _x, _y, _w, _h) {
+                drawImageCenteredClipBase(game.imgManager[_imageElement.index], _sx, _sy, _sw, _sh, _x, _y, _w, _h)
+            }
+
+            function drawImageCenteredClipBase(_image, _sx, _sy, _sw, _sh, _x, _y, _w, _h) {
+                if (!isDefined(_image))  
+                    return;
+
+                let prjX = _x - (_w >> 1);
+                let prjY = game.canvas.HEIGHT - _y - (_h >> 1);
+                
+                context.drawImage(_image, _sx, _sy, _sw, _sh, prjX, prjY, _w, _h);
+            }
+
+            // Maths
+            function average(_num1, _num2) {
+                return (_num1 + _num2) / 2;
+            }
+
+            function randomWithNegative(_amplitude) {
+                return Math.round(Math.random() * _amplitude << 1) - _amplitude;
+            }
+
+            function random(_amplitude) {
+                return Math.round(Math.random() * _amplitude);
+            }
+
+            function math_sin(_degrees) {
+                return Math.sin(_degrees * game.engine.RADIAN);
+            }
+
+            function math_cos(_degrees) {
+                return Math.cos(_degrees * game.engine.RADIAN);
+            }
+
+            // Debug tools
+            function renderDebugMode() {
+                if (game.debug.enabled === true) {
+
+                    context.lineWidth = 1; // Set line width for stroke
+                    context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                    context.fillRect(0,0, game.canvas.WIDTH, game.debug.DEBUG_LINES * game.debug.DEBUG_LINE_HEIGHT);
+                    
+                    drawDebugLine("currentState: " + game.state.currentState, null, 1, 1);
+                    drawDebugLine("player.velocity", player.velocityY, 1, 2);
+                    drawDebugLine("player.y", player.y, 1, 3);
+                    drawDebugLine("arr stock size", tunnel.arrPushers.length, 1, 4);
+                    drawDebugLine(tunnel.monthlyCycle.toString(), null, 1, 5);
+                    drawDebugLine("game.canvas.offsetY", game.canvas.offsetY, 1, 6);
+                    drawDebugLine("game.canvas.offsetX", game.canvas.offsetX, 1, 7);                    
+                }    
+            }
+
+            // Primitives
+            function isDefined(_obj) {
+                return (_obj !== null && typeof _obj !== 'undefined');
+            }
+
+            // Unit tests
+            function runUnitTests() {
+                //unitTest_logMonthlyCycleValues();
+                //unitTest_whenFunction_detectCollision();
+            }
+
+            function unitTest_logMonthlyCycleValues() {
+                console.log("UNIT TEST START: unitTest_logMonthlyCycleValues")
+                let monthly = new MonthlyCycle();
+                for (let index = 0; index < 7 * 12 * 13; index++) {
+                    console.log(monthly.toString());
+                    monthly.incrementWeek();
+                }
+                console.log("UNIT TEST END: unitTest_logMonthlyCycleValues")
+            }
+
+            function unitTest_whenFunction_detectCollision() {
+                console.log("UNIT TEST START: unitTest_whenFunction_detectCollision")
+                let rect1;
+                let rect2;
+                let result; 
+                let expected;
+
+                console.log("testing rect1,rect2");
+                expected = false;
+                rect1 = {x: 100, y: 100, width: 50, height: 80};
+                rect2 = {x: 200, y: 100, width: 10, height: 10};
+                result = detectCollision(rect1, rect2);
+                console.log(rect1);
+                console.log(rect2);
+                helper_unitTest_logTestResult(expected, result);
+                console.log("");
+
+                console.log("testing rect1,rect2");
+                expected = true;
+                rect1 = {x: 100, y: 100, width: 50, height: 80};
+                rect2 = {x: 95, y: 95, width: 50, height: 80};
+                result = detectCollision(rect1, rect2);
+                console.log(rect1);
+                console.log(rect2);
+                helper_unitTest_logTestResult(expected, result);
+                console.log("");
+
+                console.log("testing rect1,rect2");
+                expected = true;
+                rect1 = {x: 100, y: 100, width: 50, height: 80};
+                rect2 = {x: 110, y: 110, width: 50, height: 80};
+                result = detectCollision(rect1, rect2);
+                console.log(rect1);
+                console.log(rect2);
+                helper_unitTest_logTestResult(expected, result);
+                console.log("");
+
+                console.log("UNIT TEST END: unitTest_whenFunction_detectCollision")
+            }
+
+            function helper_unitTest_logTestResult(_expected, _result) {
+                let logMessage = "Result = " + _result + ", expected = " + _expected 
+                if (_expected !== _result)
+                {
+                    logMessage = "!!!FAILED!!! " + logMessage;
+                }
+                else
+                {
+                    logMessage = "PASSS " + logMessage;
+                }
+                console.log(logMessage);
+            }
+
+            function rgbaToColor(_r, _g, _b, _a) 
+            {
+                _r = _r % 256;
+                _g = _g % 256;
+                _b = _b % 256;
+                var result = 'rgba(' + _r.toString() + "," + _g.toString() + "," + _b.toString() + "," + _a.toString()+")";
+                return result;
+            }
+
+        </script>
+    </body>
+</html>
