@@ -72,7 +72,7 @@ Last Updated: 25/12/2025
         <meta charset="UTF-8">
         <meta name="viewport", content="width=device-width, initial-scale=1.0">
         
-        <title>Flappy Roll v2.8 by mfontanadev</title>
+        <title>Flappy Roll v2.11 by mfontanadev</title>
         <style>
             body {
                 text-align: center;
@@ -132,8 +132,9 @@ Last Updated: 25/12/2025
                     HEIGHT : 640,
                     HALF_WIDTH : 0,
                     HALF_HEIGHT : 640 >> 1,
-                    offsetX : -1,
-                    offsetY : -1
+                    gameOffsetX : -1,
+                    gameOffsetY : -1,
+                    boundingRect : null
                 },
                 ux : {
                     font : {
@@ -144,7 +145,8 @@ Last Updated: 25/12/2025
                     }
                 },
                 sound : {
-                    enabled : true
+                    enabled : true,
+                    audioCtx : null
                 },
                 navigation : {
                     C_SCREEN_MENU : "MENU",
@@ -349,6 +351,8 @@ Last Updated: 25/12/2025
             }
 
             function constructors() {
+                game.sound.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
                 game.canvas.WIDTH = config.pushers.WIDTH * config.general.WANTED_PUSHERS_PER_WIDTH;
                 game.canvas.HALF_WIDTH = game.canvas.WIDTH >> 1;
 
@@ -392,8 +396,8 @@ Last Updated: 25/12/2025
                 background.reset();
                 footerBar.reset();
 
-                game.canvas.offsetX = 0;
-                game.canvas.offsetY = 0;
+                game.canvas.gameOffsetX = 0;
+                game.canvas.gameOffsetY = 0;
                 game.gameRules.openingSpace = config.tunnel.C_DEFAULT_MIN_OPENING_SPACE; 
             }
 
@@ -552,7 +556,7 @@ Last Updated: 25/12/2025
                         this.angle = (this.angle + 15) % 360;
                     }
 
-                    this.y = this.baseY + (math_sin(this.angle) * 5) - game.canvas.offsetY;;
+                    this.y = this.baseY + (math_sin(this.angle) * 5) - game.canvas.gameOffsetY;;
                 }
 
                 this.render = function() {
@@ -802,7 +806,7 @@ Last Updated: 25/12/2025
                 this.render = function() {
                    
                     /* Realtime sky gradient effect */ 
-                    let skyOffset = game.canvas.offsetY >> 4;
+                    let skyOffset = game.canvas.gameOffsetY >> 4;
                     let grd = context.createLinearGradient(0, skyOffset, 0, game.canvas.HEIGHT + skyOffset);
                     grd.addColorStop(0, rgbaToColor(3, 12, 18, 1));
                     grd.addColorStop(0.1, rgbaToColor(30, 30, 64, 1));
@@ -938,7 +942,7 @@ Last Updated: 25/12/2025
                 this.render = function() {
                     if (this.y > 0) {
                         let prjX = (game.canvas.WIDTH - config.stockIndicator.C_PADDING) + config.stockIndicator.C_SIZE;
-                        let prjY = game.canvas.HEIGHT - this.y + game.canvas.offsetY;
+                        let prjY = game.canvas.HEIGHT - this.y + game.canvas.gameOffsetY;
                         let color =  config.stockIndicator.C_NORMAL_COLOR;
 
                         context.fillStyle = 'rgba(0, 0, 0, .5)';
@@ -1187,7 +1191,7 @@ Last Updated: 25/12/2025
                     for (let i = 0; i < this.arrPushers.length; i++) {
                         item = this.arrPushers[i];
                         x = this.scrollLeftCounter + (i * config.pushers.WIDTH) + (config.pushers.WIDTH >> 1);
-                        y = item.value - game.canvas.offsetY;
+                        y = item.value - game.canvas.gameOffsetY;
 
                         // Pushers are green at normal weeks otherwise pushers are red.
                         if (item.isPartOfAnExtraweek) {
@@ -1576,17 +1580,17 @@ Last Updated: 25/12/2025
 
                     // Scroll
                     if (this.y > game.canvas.HEIGHT * .75) {
-                        game.canvas.offsetY -= this.velocityY ;
+                        game.canvas.gameOffsetY -= this.velocityY ;
                         this.y += this.velocityY;
                     }
 
-                    if (game.canvas.offsetY > 0 && 
+                    if (game.canvas.gameOffsetY > 0 && 
                         this.y < game.canvas.HEIGHT * .25) {
-                        game.canvas.offsetY -= this.velocityY ;
+                        game.canvas.gameOffsetY -= this.velocityY ;
                         this.y += this.velocityY;
                     }
 
-                    game.canvas.offsetY = Math.max(game.canvas.offsetY, 0);
+                    game.canvas.gameOffsetY = Math.max(game.canvas.gameOffsetY, 0);
                 }
 
                 this.updateWingAnimation = function() {
@@ -1619,8 +1623,8 @@ Last Updated: 25/12/2025
 
                 this.checkBandsCollision = function() {
                     return game.debug.CHECK_COLLISIONS && (this.y < 0 || 
-                        this.y < this.depTunnel.getPusherBottomPositionY(2) + config.pushers.HEIGHT - game.canvas.offsetY ||
-                        this.y > this.depTunnel.getPusherTopPositionY(2) - config.pushers.HEIGHT - game.canvas.offsetY);
+                        this.y < this.depTunnel.getPusherBottomPositionY(2) + config.pushers.HEIGHT - game.canvas.gameOffsetY ||
+                        this.y > this.depTunnel.getPusherTopPositionY(2) - config.pushers.HEIGHT - game.canvas.gameOffsetY);
                 }
 
                 this.askTunnelToCheckBonusCollision = function() {
@@ -1629,8 +1633,8 @@ Last Updated: 25/12/2025
 
                 this.isChallengeOvercome = function() {
                     return this.y < 0 || 
-                        this.y < this.depTunnel.getPusherBottomPositionY(2) - game.canvas.offsetY ||
-                        this.y > this.depTunnel.getPusherTopPositionY(2) - game.canvas.offsetY;
+                        this.y < this.depTunnel.getPusherBottomPositionY(2) - game.canvas.gameOffsetY ||
+                        this.y > this.depTunnel.getPusherTopPositionY(2) - game.canvas.gameOffsetY;
                 }
 
                 this.startDyingAnimation = function() {
@@ -1767,7 +1771,6 @@ Last Updated: 25/12/2025
                 this.reset = function() {
                     this.iconSoundPosX = game.canvas.HALF_WIDTH - config.footerBar.C_GAP_SIZE,
                     this.iconSoundPosY = config.footerBar.C_OFFSET_Y;
-
                     this.imageIconCreditsPosX = game.canvas.HALF_WIDTH + config.footerBar.C_GAP_SIZE,
                     this.imageIconCreditsPosY = config.footerBar.C_OFFSET_Y;
 
@@ -1849,6 +1852,7 @@ Last Updated: 25/12/2025
                 CANVAS = document.getElementById("CANVAS");
                 CANVAS.height = game.canvas.HEIGHT;
                 CANVAS.width = game.canvas.WIDTH;
+                game.canvas.boundingRect = CANVAS.getBoundingClientRect();
                 context = CANVAS.getContext("2d");
             }
 
@@ -1857,6 +1861,9 @@ Last Updated: 25/12/2025
                 document.addEventListener("keydown", processKeyDown);
                 document.addEventListener("mouseup", processMouseUp);
                 document.addEventListener("mousedown", processMouseDown);
+            
+                window.addEventListener('touchend', unlockAudio);
+                window.addEventListener('touchstart', processTouchStart);
             }
 
             function loadResources() {
@@ -1932,7 +1939,7 @@ Last Updated: 25/12/2025
                 }
                 drawImageCenteredBase(redBall, game.canvas.HALF_WIDTH, game.canvas.HALF_HEIGHT, 10, 10);
             }
-
+            
             // Inputs
             function processKeyDown(e) {
                 if (compareIgnoreCase(e.key, game.keyboard.primaryButton.key1) ||
@@ -1971,17 +1978,38 @@ Last Updated: 25/12/2025
 
             function processMouseDown(e) {
                 game.keyboard.primaryButton.pressed = true;
-
                 game.mouse.offsetX = e.offsetX;
                 game.mouse.offsetY = game.canvas.HEIGHT - e.offsetY;
             }
 
             function processMouseUp(e) {
                 game.keyboard.primaryButton.pressed = false;
-
                 game.mouse.offsetX = -1;
                 game.mouse.offsetY = -1;
             }
+
+            function processTouchStart(e) {
+                var touches = e.changedTouches;
+
+                game.keyboard.primaryButton.pressed = true;
+                game.mouse.offsetX = touches[0].clientX - game.canvas.boundingRect.left;
+                game.mouse.offsetY = game.canvas.HEIGHT - (touches[0].clientY - game.canvas.boundingRect.top);
+            }
+
+            function processTouchEnd(e) {
+                game.keyboard.primaryButton.pressed = false;
+                game.mouse.offsetX = -1;
+                game.mouse.offsetY = -1;
+            }
+                        
+            const unlockAudio = (e) => {
+                if (game.sound.audioCtx.state === 'suspended') {
+                        game.sound.audioCtx.resume().then(() => {
+                        window.removeEventListener('touchend', unlockAudio);
+                    });
+                }
+                window.addEventListener('touchend', processTouchEnd);        
+            };
 
             // Navigation and state machine
             function navigateTo(_screen) {
@@ -2213,8 +2241,8 @@ Last Updated: 25/12/2025
                     drawDebugLine("player.y", player.y, 1, 3);
                     drawDebugLine("arr stock size", tunnel.arrPushers.length, 1, 4);
                     drawDebugLine(tunnel.monthlyCycle.toString(), null, 1, 5);
-                    drawDebugLine("game.canvas.offsetY", game.canvas.offsetY, 1, 6);
-                    drawDebugLine("game.canvas.offsetX", game.canvas.offsetX, 1, 7);                    
+                    drawDebugLine("game.canvas.gameOffsetY", game.canvas.gameOffsetY, 1, 6);
+                    drawDebugLine("game.canvas.gameOffsetX", game.canvas.gameOffsetX, 1, 7);                    
                 }    
             }
 
