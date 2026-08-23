@@ -90,7 +90,7 @@ To avoid cross-reference browser constraints, when you try to open index.html ju
 
 * Step 1: in root dir type: "http-server" and then enter.
 * Step 2: open a browser window and type "localhost:8080".
-* PLAN B: download "Web Server for Chrome" plugin and set initial folder to your local working dir.
+* PLAN B: download "Web Server for Chrome" plugin and set initial folder to "RiseOfLadybug" in your disk.
 
 ## Code explanation
 

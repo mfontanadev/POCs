@@ -1,0 +1,225 @@
+<!--
+About the author
+~~~~~~~~~~~~~~~~~~~~
+site: https://mfontanadev.github.io
+twitter: https://twitter.com/mfontanadev
+git: https://github.com/mfontanadev
+linkedin: http://linkedin.com/in/mauricio-fontana/
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" , content="width=device-width, initial-scale=1.0">
+
+    <title>Flappy Roll v1.0 by mfontanadev</title>
+    <style>
+        body {
+            text-align: center;
+            background-color: gray;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="canvas-container">
+        <canvas id="CANVAS"></canvas>
+    </div>
+
+    <script>
+        // debug
+        let context;
+
+        // game engine definitions
+        let canvas;
+        let C_WIDTH = 360;
+        let C_HEIGHT = 640;
+        let C_HALF_WIDTH = C_WIDTH >> 1;
+        let C_HALF_HEIGHT = C_HEIGHT >> 1;
+
+        // game logic default values
+        let config = {
+            background: {
+                C_ANIM_SPEED: 4,
+                C_BUILDINGS_OFFSET_Y: 216,
+                C_BUILDINGS_WIDTH: 360
+            }
+        }
+
+        // game variables
+        let cloudImage;
+        let backgroundFooterImage;
+        let buildingsImage;
+
+        // classes
+        let background;
+
+        // **** Entry point ****
+        window.onload = function () {
+            constructors();
+
+            setupGraphicContext();
+
+            loadResources();
+
+            gameLoop();
+        };
+
+        function constructors() {
+            cloudImage = new Image();
+            backgroundFooterImage = new Image();
+            buildingsImage = new Image();
+
+            background = new Background();
+            background.reset();
+        }
+
+        function gameLoop() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            background.updateGameLogic();
+            background.render();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ***** Classes *****
+        function Background() {
+
+            this.buildingsOffset = 0;
+            this.buildingsCounter = 0;
+            this.buildingsSpeed = 0;
+
+            this.cloudSpeed = 0;
+            this.cloudCounter = 0;
+            this.cloudX = 0;
+            this.cloudY = 0;
+
+            this.reset = function () {
+                this.buildingsCounter = 0;
+                this.buildingsSpeed = config.background.C_ANIM_SPEED;
+                this.buildingsOffset = 0;
+
+                this.cloudCounter = 0;
+                this.cloudSpeed = this.buildingsSpeed * 3;
+
+                this.arrCloud = [];
+                this.arrCloud.push({ x: 170, y: 146, sizeX: 100, sizeY: 34 });
+                this.arrCloud.push({ x: 24, y: 233, sizeX: 120, sizeY: 38 });
+                this.arrCloud.push({ x: 339, y: 212, sizeX: 150, sizeY: 47 });
+                this.arrCloud.push({ x: 322, y: 331, sizeX: 150, sizeY: 47 });
+                this.arrCloud.push({ x: 87, y: 385, sizeX: 150, sizeY: 47 });
+            }
+
+            this.updateGameLogic = function () {
+                this.updateCloudLogic();
+
+                this.updateBuildingLogic();
+            }
+
+            this.updateBuildingLogic = function () {
+                this.buildingsCounter++;
+                if (this.buildingsCounter > this.buildingsSpeed) {
+                    this.buildingsCounter = 0;
+
+                    this.buildingsOffset = this.buildingsOffset + 1;
+                    if (this.buildingsOffset >= config.background.C_BUILDINGS_WIDTH) {
+                        this.buildingsOffset = 0;
+                    }
+                }
+            }
+
+            this.updateCloudLogic = function () {
+                this.cloudCounter++;
+                if (this.cloudCounter > this.cloudSpeed) {
+                    this.cloudCounter = 0;
+
+                    this.arrCloud.forEach(item => {
+                        item.x -= 1;
+
+                        if (item.x < -item.sizeX) {
+                            item.x = C_WIDTH + (item.sizeX >> 1);
+                        }
+                    });
+                }
+            }
+
+            this.render = function () {
+                this.renderSky();
+
+                // Clouds
+                this.arrCloud.forEach(item => {
+                    drawImageCenteredWH(cloudImage, item.x, C_HEIGHT - item.y, item.sizeX, item.sizeY);
+                });
+
+                // Buildings
+                drawImageCentered(buildingsImage,
+                    config.background.C_BUILDINGS_WIDTH - this.buildingsOffset,
+                    C_HALF_HEIGHT - config.background.C_BUILDINGS_OFFSET_Y);
+
+                drawImageCentered(backgroundFooterImage, C_HALF_WIDTH, C_HALF_HEIGHT);
+
+            }
+
+            this.renderSky = function () {
+                // Realtime sky gradient effect
+                let grd = context.createLinearGradient(0, 0, 0, C_HEIGHT);
+                grd.addColorStop(0, rgbaToColor(3, 12, 18, 1));
+                grd.addColorStop(0.1, rgbaToColor(30, 30, 64, 1));
+                grd.addColorStop(0.5, rgbaToColor(33, 122, 180, 1));
+                grd.addColorStop(1, rgbaToColor(219, 248, 243, 1));
+                context.fillStyle = grd;
+                context.fillRect(0, 0, C_WIDTH, C_HEIGHT - 60)
+            }
+        }
+
+        // ***** Minimal-framework *****
+        function setupGraphicContext() {
+            canvas = document.getElementById("CANVAS");
+            canvas.width = C_WIDTH;
+            canvas.height = C_HEIGHT;
+            context = canvas.getContext("2d");
+        }
+
+        function loadResources() {
+            cloudImage.src = "images/cloud.png";
+            backgroundFooterImage.src = "images/background.png";
+            buildingsImage.src = "images/layer_buildings.png";
+        }
+
+        // Graphics
+        function drawImageCentered(_image, _x, _y) {
+            drawImageCenteredWH(_image, _x, _y, _image.width, _image.height);
+        }
+
+        function drawImageCenteredWH(_image, _x, _y, _w, _h) {
+            drawImageCenteredBase(_image, _x, _y, _w, _h);
+        }
+
+        function drawImageCenteredBase(_image, _x, _y, _w, _h) {
+            let prjX = _x - (_w >> 1);
+            let prjY = C_HEIGHT - _y - (_h >> 1);
+
+            context.drawImage(_image, prjX, prjY, _w, _h);
+        }
+
+        // Utils
+        function rgbaToColor(_r, _g, _b, _a) {
+            _r = _r % 256;
+            _g = _g % 256;
+            _b = _b % 256;
+            var result = 'rgba(' + _r.toString() + "," + _g.toString() + "," + _b.toString() + "," + _a.toString() + ")";
+            return result;
+        }
+    </script>
+</body>
+
+</html>
